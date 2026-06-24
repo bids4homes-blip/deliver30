@@ -46,10 +46,8 @@
 
   button { font-family: var(--fb); -webkit-tap-highlight-color: transparent; }
 
-  /* ── Layout shells ───────────────────────────── */
   .app { min-height: 100vh; }
 
-  /* Desktop sidebar */
   .sidebar {
     position: fixed; top: 0; left: 0; bottom: 0; width: 220px;
     background: var(--surface); border-right: 1px solid var(--border);
@@ -74,7 +72,6 @@
     font-weight: 600; border-left: 3px solid var(--amber);
   }
 
-  /* Mobile shells */
   .topbar {
     position: fixed; top: 0; left: 0; right: 0; height: 54px;
     background: rgba(21,18,16,0.94); backdrop-filter: blur(12px);
@@ -100,7 +97,6 @@
   .tab-btn.active .lbl { font-weight: 700; }
   .tab-underline { width: 20px; height: 2px; background: var(--amber); border-radius: 1px; margin-top: 4px; }
 
-  /* ── Components ───────────────────────────── */
   .card {
     background: var(--card); border: 1px solid var(--border);
     border-radius: 16px; padding: 20px;
@@ -191,80 +187,69 @@
 <div id="root"></div>
 
 <script>
-const C = {
+var C = {
   bg:"#0e0c0a", surface:"#151210", card:"#1a1714", border:"#2a2520",
   amber:"#e8a04a", amberSoft:"#c47f2e", amberDim:"#7a4e1a",
   cream:"#f0e6d3", creamDim:"#b8a898", sand:"#8a7a68",
   rust:"#c4614a", rustSoft:"#e07a62", teal:"#4a8c8a", tealSoft:"#62aaa8",
-  text:"#ede4d8", muted:"#7a6e62",
+  text:"#ede4d8", muted:"#7a6e62"
 };
-const FM = "var(--fm)", FD = "var(--fd)", FB = "var(--fb)";
+var FM = "var(--fm)", FD = "var(--fd)", FB = "var(--fb)";
 
-const NAV = [
+var NAV = [
   { id:0, label:"Overview",  icon:"\u25C8" },
   { id:1, label:"Orders",    icon:"\u2299" },
   { id:2, label:"Schedule",  icon:"\u25F7" },
   { id:3, label:"Expenses",  icon:"\u25CE" },
-  { id:4, label:"Calc",      icon:"\u229E" },
+  { id:4, label:"Calc",      icon:"\u229E" }
 ];
 
-const TIPS = [
+var TIPS = [
   "Idle time is your biggest enemy \u2014 reposition near restaurants between every drop.",
   "Sit just outside the hotspot. Less competition, same demand.",
   "A bad order doesn't just pay poorly \u2014 it costs you the next good one.",
   "Multi-apping can lift your hourly 30\u201350% by killing dead time.",
   "Friday & Saturday dinner is the best window of the week.",
   "Weekday lunch near office clusters is massively underrated.",
-  "Cherry-pick hard. Acceptance rate matters far less than profit per mile.",
+  "Cherry-pick hard. Acceptance rate matters far less than profit per mile."
 ];
 
-/* ── tiny state store ── */
-const App = {
+var App = {
   tab: 0,
   mobile: window.innerWidth < 768,
-  // overview
   ov: { gross:"", hours:"", miles:"", fuel:"", orders:"", tipIdx:0 },
-  // order checker
   oc: { isEV:false, mode:"photo", pay:"", miles:"", minutes:"", result:null,
         scanning:false, scanError:null, imgPreview:null },
-  // schedule
   sc: { days:[] },
-  // expenses
   ex: { isEV:false, mpg:"28", gasPrice:"3.50", kwhPer100:"30", elecPrice:"0.16",
         fastChargePct:"20", fastChargePrice:"0.42", wkMiles:"300", depRate:"0.07" },
-  // calculator
   cl: { isEV:false, dph:"3", base:"3.50", tip:"8.00", mpd:"4", peakPay:"0",
-        gasP:"3.50", mpg:"28", kwhPer100:"30", elecPrice:"0.16", depM:"0.07" },
+        gasP:"3.50", mpg:"28", kwhPer100:"30", elecPrice:"0.16", depM:"0.07" }
 };
 
-const $ = (id) => document.getElementById(id);
-// num() parses to a number, defaulting on junk. Negatives are floored to 0 —
-// no delivery metric (pay, miles, hours, fuel) can sensibly be negative.
-const num = (v, d=0) => { const n = parseFloat(v); return isNaN(n) ? d : Math.max(0, n); };
-const esc = (s) => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-// Shrink the font when a number gets long so it can't overflow its card.
+function $(id) { return document.getElementById(id); }
+function num(v, d) { d = d || 0; var n = parseFloat(v); return isNaN(n) ? d : Math.max(0, n); }
+function esc(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
 function fitFont(str, base) {
-  const len = String(str).length;
+  var len = String(str).length;
   if (len <= 8)  return base;
   if (len <= 11) return Math.round(base * 0.7);
   return Math.round(base * 0.5);
 }
 
-/* ── persistence ───────────────────────────────
-   Saves the driver's inputs to the browser so they survive
-   closing the tab. Only plain numbers/strings/arrays are stored —
-   never the scan image, scan state, or which tab is open. */
-const STORAGE_KEY = "deliver30_v1";
+var STORAGE_KEY = "deliver30_v1";
 
 function saveState() {
   try {
-    const snapshot = {
+    var snapshot = {
       ov: { gross:App.ov.gross, hours:App.ov.hours, miles:App.ov.miles,
             fuel:App.ov.fuel, orders:App.ov.orders },
       oc: { isEV:App.oc.isEV, mode:App.oc.mode },
       sc: { days:App.sc.days },
-      ex: { ...App.ex },
-      cl: { ...App.cl },
+      ex: Object.assign({}, App.ex),
+      cl: Object.assign({}, App.cl)
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
   } catch (e) { /* storage full or blocked — fail silently */ }
@@ -272,10 +257,9 @@ function saveState() {
 
 function loadState() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    var raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
-    const s = JSON.parse(raw);
-    // Merge each section so new fields keep their defaults if missing
+    var s = JSON.parse(raw);
     if (s.ov) Object.assign(App.ov, s.ov);
     if (s.oc) { App.oc.isEV = !!s.oc.isEV; if (s.oc.mode) App.oc.mode = s.oc.mode; }
     if (s.sc && Array.isArray(s.sc.days)) App.sc.days = s.sc.days;
@@ -284,889 +268,770 @@ function loadState() {
   } catch (e) { /* corrupt data — ignore and start fresh */ }
 }
 
-/* ── shared HTML builders ── */
+function getByKey(k) { var p = k.split("."); return App[p[0]][p[1]]; }
+function setByKey(k, v) { var p = k.split("."); App[p[0]][p[1]] = v; }
+
 function pageHead(eyebrow, title, sub) {
-  return `<div class="page-head">
-    <div class="page-eyebrow">${esc(eyebrow)}</div>
-    <h1 class="page-title">${esc(title)}</h1>
-    ${sub ? `<p class="page-sub">${esc(sub)}</p>` : ""}
-  </div>`;
+  return '<div class="page-head">' +
+    '<div class="page-eyebrow">' + esc(eyebrow) + '</div>' +
+    '<h1 class="page-title">' + esc(title) + '</h1>' +
+    (sub ? '<p class="page-sub">' + esc(sub) + '</p>' : '') +
+  '</div>';
 }
 
-function ninput({ key, label, prefix, placeholder }) {
-  return `<div>
-    <div class="eyebrow">${esc(label)}</div>
-    <div class="ninput-shell">
-      ${prefix ? `<span class="ninput-prefix">${prefix}</span>` : ""}
-      <input type="number" inputmode="decimal" data-key="${key}"
-        placeholder="${placeholder || "0"}" value="${esc(getByKey(key))}" />
-    </div>
-  </div>`;
+function ninput(o) {
+  return '<div>' +
+    '<div class="eyebrow">' + esc(o.label) + '</div>' +
+    '<div class="ninput-shell">' +
+      (o.prefix ? '<span class="ninput-prefix">' + o.prefix + '</span>' : '') +
+      '<input type="number" inputmode="decimal" data-key="' + o.key + '" placeholder="' +
+        (o.placeholder || "0") + '" value="' + esc(getByKey(o.key)) + '" />' +
+    '</div>' +
+  '</div>';
 }
 
-function toggle({ key, leftLabel, rightLabel, leftIcon, rightIcon, value }) {
-  return `<div class="toggle">
-    <button class="toggle-opt ${!value ? "active":""}" data-toggle="${key}" data-val="false">
-      <span class="ic">${leftIcon}</span>${esc(leftLabel)}
-    </button>
-    <button class="toggle-opt ${value ? "active":""}" data-toggle="${key}" data-val="true">
-      <span class="ic">${rightIcon}</span>${esc(rightLabel)}
-    </button>
-  </div>`;
+function toggle(o) {
+  return '<div class="toggle">' +
+    '<button class="toggle-opt ' + (!o.value ? "active" : "") + '" data-toggle="' + o.key + '" data-val="false">' +
+      '<span class="ic">' + o.leftIcon + '</span>' + esc(o.leftLabel) +
+    '</button>' +
+    '<button class="toggle-opt ' + (o.value ? "active" : "") + '" data-toggle="' + o.key + '" data-val="true">' +
+      '<span class="ic">' + o.rightIcon + '</span>' + esc(o.rightLabel) +
+    '</button>' +
+  '</div>';
 }
 
 function pill(text, color) {
-  return `<span class="pill" style="color:${color};background:${color}18;border:1px solid ${color}33">${esc(text)}</span>`;
+  return '<span class="pill" style="color:' + color + ';background:' + color + '18;border:1px solid ' + color + '33">' + esc(text) + '</span>';
 }
 
-function ratingBar(value, color, max=10) {
-  let segs = "";
-  for (let i=0;i<max;i++) segs += `<div class="seg" style="${i<value?`background:${color}`:""}"></div>`;
-  return `<div class="ratingbar">${segs}</div>`;
+function ratingBar(value, color, max) {
+  max = max || 10;
+  var segs = "";
+  for (var i = 0; i < max; i++) {
+    segs += '<div class="seg" style="' + (i < value ? "background:" + color : "") + '"></div>';
+  }
+  return '<div class="ratingbar">' + segs + '</div>';
 }
-
-/* getByKey / setByKey traverse the App store via "section.field" keys */
-function getByKey(k) { const [s,f]=k.split("."); return App[s][f]; }
-function setByKey(k,v){ const [s,f]=k.split("."); App[s][f]=v; }
 
 /* ── OVERVIEW ── */
 function Overview() {
-  const o = App.ov;
-  const g=num(o.gross), h=num(o.hours), m=num(o.miles), f=num(o.fuel), ord=num(o.orders);
-  const net=g-f, netHr=h>0?net/h:0, dpm=m>0?g/m:0, apo=ord>0?g/ord:0, oph=h>0?ord/h:0, tax=g*0.20;
-  const tierColor = netHr>=30?C.tealSoft:netHr>=23?C.amber:C.rustSoft;
-  const tierLabel = netHr>=30?"Advanced":netHr>=23?"Intermediate":"Beginner";
-  const pct = Math.max(0, Math.min((netHr/40)*100, 100));
-  const mob = App.mobile;
-  const heroStr = `${netHr.toFixed(2)}`;
-  const heroSize = fitFont(heroStr, mob?56:72);
+  var o = App.ov;
+  var g = num(o.gross), h = num(o.hours), m = num(o.miles), f = num(o.fuel), ord = num(o.orders);
+  var net = g - f, netHr = h > 0 ? net / h : 0, dpm = m > 0 ? g / m : 0,
+      apo = ord > 0 ? g / ord : 0, oph = h > 0 ? ord / h : 0, tax = g * 0.20;
+  var tierColor = netHr >= 30 ? C.tealSoft : netHr >= 23 ? C.amber : C.rustSoft;
+  var tierLabel = netHr >= 30 ? "Advanced" : netHr >= 23 ? "Intermediate" : "Beginner";
+  var pct = Math.max(0, Math.min((netHr / 40) * 100, 100));
+  var mob = App.mobile;
+  var heroStr = "$" + netHr.toFixed(2);
+  var heroSize = fitFont(heroStr, mob ? 56 : 72);
 
-  const stats = [
-    { label:"$/Mile",      value:`$${dpm.toFixed(2)}`, ok:dpm>=2,   note:"$2.00 min" },
-    { label:"Avg/Order",   value:`$${apo.toFixed(2)}`, ok:apo>=7,   note:"$7.00 min" },
-    { label:"Orders/Hr",   value:oph.toFixed(1),        ok:oph>=2.5, note:"2.5 target" },
-    { label:"Tax Reserve", value:`$${tax.toFixed(2)}`,  ok:true,     note:"20% of gross", color:C.amber },
-  ].map(s => `<div class="card">
-      <div class="eyebrow">${s.label}</div>
-      <div class="bignum" style="font-size:28px;color:${s.color||(s.ok?C.tealSoft:C.rustSoft)}">${s.value}</div>
-      <div style="margin-top:6px;font-size:12px;color:${s.ok?C.tealSoft:C.rust}">${s.ok?"\u2713":"\u2191"} ${s.note}</div>
-    </div>`).join("");
+  var statData = [
+    { label:"$/Mile",      value:"$" + dpm.toFixed(2), ok:dpm >= 2,   note:"$2.00 min" },
+    { label:"Avg/Order",   value:"$" + apo.toFixed(2), ok:apo >= 7,   note:"$7.00 min" },
+    { label:"Orders/Hr",   value:oph.toFixed(1),        ok:oph >= 2.5, note:"2.5 target" },
+    { label:"Tax Reserve", value:"$" + tax.toFixed(2),  ok:true,       note:"20% of gross", color:C.amber }
+  ];
+  var stats = statData.map(function(s) {
+    return '<div class="card">' +
+      '<div class="eyebrow">' + s.label + '</div>' +
+      '<div class="bignum" style="font-size:28px;color:' + (s.color || (s.ok ? C.tealSoft : C.rustSoft)) + '">' + s.value + '</div>' +
+      '<div style="margin-top:6px;font-size:12px;color:' + (s.ok ? C.tealSoft : C.rust) + '">' + (s.ok ? "\u2713" : "\u2191") + ' ' + s.note + '</div>' +
+    '</div>';
+  }).join("");
 
-  const dots = TIPS.map((_,i)=>`<div data-tip="${i}" style="width:${i===o.tipIdx?18:6}px;height:6px;border-radius:3px;background:${i===o.tipIdx?C.amber:C.border};cursor:pointer;transition:all 0.3s"></div>`).join("");
+  var dots = TIPS.map(function(_, i) {
+    return '<div data-tip="' + i + '" style="width:' + (i === o.tipIdx ? 18 : 6) + 'px;height:6px;border-radius:3px;background:' + (i === o.tipIdx ? C.amber : C.border) + ';cursor:pointer;transition:all 0.3s"></div>';
+  }).join("");
 
-  return pageHead("Shift Tracker","Today's Overview","Log your shift to see your real net hourly rate after fuel.") + `
-    <div style="display:grid;grid-template-columns:${mob?"1fr 1fr":"repeat(5,1fr)"};gap:12px;margin-bottom:20px">
-      ${ninput({key:"ov.gross",label:"Gross Earned",prefix:"$",placeholder:"0.00"})}
-      ${ninput({key:"ov.hours",label:"Hours Online",placeholder:"0.0"})}
-      ${ninput({key:"ov.miles",label:"Miles Driven",placeholder:"0"})}
-      ${ninput({key:"ov.fuel",label:"Fuel Cost",prefix:"$",placeholder:"0.00"})}
-      <div style="${mob?"grid-column:span 2":""}">${ninput({key:"ov.orders",label:"Orders Done",placeholder:"0"})}</div>
-    </div>
+  return pageHead("Shift Tracker", "Today's Overview", "Log your shift to see your real net hourly rate after fuel.") +
+    '<div style="display:grid;grid-template-columns:' + (mob ? "1fr 1fr" : "repeat(5,1fr)") + ';gap:12px;margin-bottom:20px">' +
+      ninput({key:"ov.gross", label:"Gross Earned", prefix:"$", placeholder:"0.00"}) +
+      ninput({key:"ov.hours", label:"Hours Online", placeholder:"0.0"}) +
+      ninput({key:"ov.miles", label:"Miles Driven", placeholder:"0"}) +
+      ninput({key:"ov.fuel", label:"Fuel Cost", prefix:"$", placeholder:"0.00"}) +
+      '<div style="' + (mob ? "grid-column:span 2" : "") + '">' + ninput({key:"ov.orders", label:"Orders Done", placeholder:"0"}) + '</div>' +
+    '</div>' +
 
-    <div class="card glow" style="margin-bottom:16px;position:relative;overflow:hidden">
-      <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle, ${C.amber}10 0%, transparent 70%);pointer-events:none"></div>
-      <div class="eyebrow">Net Hourly Rate</div>
-      <div class="bignum" style="font-size:${heroSize}px;color:${tierColor};word-break:break-all">${heroStr}</div>
-      <div style="margin-top:16px;margin-bottom:8px" class="row-between">
-        <span style="font-size:12px;color:${C.muted}">$0</span>
-        ${pill(tierLabel, tierColor)}
-        <span style="font-size:12px;color:${C.muted}">$40/hr</span>
-      </div>
-      <div style="height:6px;background:${C.surface};border-radius:3px;overflow:hidden">
-        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg, ${C.amberDim}, ${tierColor});border-radius:3px;transition:width 0.6s ease"></div>
-      </div>
-      <div style="margin-top:14px;font-size:13px;color:${C.muted}">
-        Net: <span style="color:${C.cream}">$${net.toFixed(2)}</span> \u00B7 Fuel deducted: <span style="color:${C.cream}">$${f.toFixed(2)}</span>
-      </div>
-    </div>
+    '<div class="card glow" style="margin-bottom:16px;position:relative;overflow:hidden">' +
+      '<div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle, ' + C.amber + '10 0%, transparent 70%);pointer-events:none"></div>' +
+      '<div class="eyebrow">Net Hourly Rate</div>' +
+      '<div class="bignum" style="font-size:' + heroSize + 'px;color:' + tierColor + ';word-break:break-all">' + heroStr + '</div>' +
+      '<div style="margin-top:16px;margin-bottom:8px" class="row-between">' +
+        '<span style="font-size:12px;color:' + C.muted + '">$0</span>' +
+        pill(tierLabel, tierColor) +
+        '<span style="font-size:12px;color:' + C.muted + '">$40/hr</span>' +
+      '</div>' +
+      '<div style="height:6px;background:' + C.surface + ';border-radius:3px;overflow:hidden">' +
+        '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg, ' + C.amberDim + ', ' + tierColor + ');border-radius:3px;transition:width 0.6s ease"></div>' +
+      '</div>' +
+      '<div style="margin-top:14px;font-size:13px;color:' + C.muted + '">' +
+        'Net: <span style="color:' + C.cream + '">$' + net.toFixed(2) + '</span> \u00B7 Fuel deducted: <span style="color:' + C.cream + '">$' + f.toFixed(2) + '</span>' +
+      '</div>' +
+    '</div>' +
 
-    <div style="display:grid;grid-template-columns:${mob?"1fr 1fr":"repeat(4,1fr)"};gap:12px;margin-bottom:16px">${stats}</div>
+    '<div style="display:grid;grid-template-columns:' + (mob ? "1fr 1fr" : "repeat(4,1fr)") + ';gap:12px;margin-bottom:16px">' + stats + '</div>' +
 
-    <div class="card">
-      <div class="eyebrow">Driver Insight</div>
-      <div style="font-size:15px;color:${C.creamDim};font-family:${FD};font-style:italic;line-height:1.7">"${esc(TIPS[o.tipIdx])}"</div>
-      <div style="margin-top:14px;display:flex;gap:6px">${dots}</div>
-    </div>`;
+    '<div class="card">' +
+      '<div class="eyebrow">Driver Insight</div>' +
+      '<div style="font-size:15px;color:' + C.creamDim + ';font-family:' + FD + ';font-style:italic;line-height:1.7">"' + esc(TIPS[o.tipIdx]) + '"</div>' +
+      '<div style="margin-top:14px;display:flex;gap:6px">' + dots + '</div>' +
+    '</div>';
 }
 
 /* ── ORDER CHECKER ── */
 function analyzeValues(p, m, mins, isEV) {
-  const minDpm = isEV?1.7:2.0, skipDpm = isEV?1.3:1.5;
-  const dpm = p/(m||1);
-  const hrlyRate = mins>0 ? p/(mins/60) : null;
-  let verdict, color, reasons=[], positives=[];
-  if (dpm>=minDpm && p>=7 && m<=6) { verdict="Accept"; color=C.tealSoft; }
-  else if (dpm>=skipDpm)            { verdict="Borderline"; color=C.amber; }
-  else                              { verdict="Decline"; color=C.rustSoft; }
+  var minDpm = isEV ? 1.7 : 2.0, skipDpm = isEV ? 1.3 : 1.5;
+  var dpm = p / (m || 1);
+  var hrlyRate = mins > 0 ? p / (mins / 60) : null;
+  var verdict, color, reasons = [], positives = [];
+  if (dpm >= minDpm && p >= 7 && m <= 6) { verdict = "Accept"; color = C.tealSoft; }
+  else if (dpm >= skipDpm)                { verdict = "Borderline"; color = C.amber; }
+  else                                    { verdict = "Decline"; color = C.rustSoft; }
 
-  if (dpm<minDpm)  reasons.push(`Below the $${minDpm.toFixed(2)}/mile rule${isEV?" (EV)":""}`);
-  if (dpm<skipDpm) reasons.push(`Under $${skipDpm.toFixed(2)}/mile \u2014 hard to justify`);
-  if (p<7)         reasons.push("Payout under $7 threshold");
-  if (m>6)         reasons.push("Over 6 miles \u2014 hurts your orders per hour");
-  if (hrlyRate!==null && hrlyRate<30) reasons.push(`Only ~$${hrlyRate.toFixed(0)}/hr at this pace \u2014 below $30 target`);
+  if (dpm < minDpm)  reasons.push("Below the $" + minDpm.toFixed(2) + "/mile rule" + (isEV ? " (EV)" : ""));
+  if (dpm < skipDpm) reasons.push("Under $" + skipDpm.toFixed(2) + "/mile \u2014 hard to justify");
+  if (p < 7)         reasons.push("Payout under $7 threshold");
+  if (m > 6)         reasons.push("Over 6 miles \u2014 hurts your orders per hour");
+  if (hrlyRate !== null && hrlyRate < 30) reasons.push("Only ~$" + hrlyRate.toFixed(0) + "/hr at this pace \u2014 below $30 target");
 
-  if (p>=10 && m<=5) positives.push("High-value, short distance \u2014 rare find");
-  if (dpm>=minDpm)    positives.push(`Meets the $${minDpm.toFixed(2)}/mile rule`);
-  if (hrlyRate!==null && hrlyRate>=30) positives.push(`~$${hrlyRate.toFixed(0)}/hr at this pace \u2014 hits your target`);
-  if (isEV && dpm>=skipDpm && dpm<minDpm) positives.push("EV running costs make this more viable than for gas vehicles");
+  if (p >= 10 && m <= 5) positives.push("High-value, short distance \u2014 rare find");
+  if (dpm >= minDpm)     positives.push("Meets the $" + minDpm.toFixed(2) + "/mile rule");
+  if (hrlyRate !== null && hrlyRate >= 30) positives.push("~$" + hrlyRate.toFixed(0) + "/hr at this pace \u2014 hits your target");
+  if (isEV && dpm >= skipDpm && dpm < minDpm) positives.push("EV running costs make this more viable than for gas vehicles");
 
-  return { verdict, color, dpm, hrlyRate, reasons, positives };
+  return { verdict:verdict, color:color, dpm:dpm, hrlyRate:hrlyRate, reasons:reasons, positives:positives };
 }
 
-/* Resize an image file in-browser to ~1024px / compressed JPEG before upload.
-   This is what keeps the scan cheap and means the user never edits anything. */
 function resizeImage(file) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const reader = new FileReader();
-    reader.onload = () => {
-      img.onload = () => {
-        const maxDim = 1024;
-        let w = img.width, h = img.height;
+  return new Promise(function(resolve, reject) {
+    var img = new Image();
+    var reader = new FileReader();
+    reader.onload = function() {
+      img.onload = function() {
+        var maxDim = 1024;
+        var w = img.width, h = img.height;
         if (w > maxDim || h > maxDim) {
-          const scale = maxDim / Math.max(w, h);
+          var scale = maxDim / Math.max(w, h);
           w = Math.round(w * scale);
           h = Math.round(h * scale);
         }
-        const canvas = document.createElement("canvas");
+        var canvas = document.createElement("canvas");
         canvas.width = w; canvas.height = h;
         canvas.getContext("2d").drawImage(img, 0, 0, w, h);
         resolve(canvas.toDataURL("image/jpeg", 0.82));
       };
-      img.onerror = () => reject(new Error("Couldn't load that image"));
+      img.onerror = function() { reject(new Error("Couldn't load that image")); };
       img.src = reader.result;
     };
-    reader.onerror = () => reject(new Error("Couldn't read that file"));
+    reader.onerror = function() { reject(new Error("Couldn't read that file")); };
     reader.readAsDataURL(file);
   });
 }
 
-async function handleScan(file) {
+var scanToken = 0;
+
+function attemptScan(base64) {
+  return fetch("/.netlify/functions/scan-order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ image: base64, mediaType: "image/jpeg" })
+  }).then(function(resp) {
+    if (!resp.ok) {
+      return { ok:false, message:"Couldn't reach the scan service. Try again in a moment.", transient:true };
+    }
+    return resp.json().then(function(parsed) {
+      if (parsed.error) {
+        return { ok:false, message:parsed.error, transient:!!parsed.transient };
+      }
+      return { ok:true, data:parsed };
+    });
+  }).catch(function() {
+    return { ok:false, message:"Couldn't reach the scan service. Try again in a moment.", transient:true };
+  });
+}
+
+function handleScan(file) {
   if (!file) return;
+  if (App.oc.scanning) return;
+  var myToken = ++scanToken;
   App.oc.scanning = true;
   App.oc.scanError = null;
   App.oc.result = null;
-  loadState();
-render();
+  render();
 
-  try {
-    const dataUrl = await resizeImage(file);
+  resizeImage(file).then(function(dataUrl) {
+    if (myToken !== scanToken) return;
     App.oc.imgPreview = dataUrl;
-    const base64 = dataUrl.split(",")[1];
+    var base64 = dataUrl.split(",")[1];
 
-    let resp;
-    try {
-      resp = await fetch("/.netlify/functions/scan-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64, mediaType: "image/jpeg" }),
-      });
-    } catch {
-      throw new Error("Network request failed — check your connection.");
+    return attemptScan(base64).then(function(res) {
+      if (myToken !== scanToken) return;
+      if (!res.ok && res.transient) {
+        return new Promise(function(r) { setTimeout(r, 2000); }).then(function() {
+          if (myToken !== scanToken) return null;
+          return attemptScan(base64);
+        });
+      }
+      return res;
+    }).then(function(res) {
+      if (myToken !== scanToken || !res) return;
+      if (!res.ok) throw new Error(res.message);
+
+      var p = Number(res.data.pay) || 0;
+      var m = Number(res.data.miles) || 0;
+      var mins = Number(res.data.minutes) || 0;
+      if (!p && !m) throw new Error("Couldn't find payout or mileage \u2014 try a clearer screenshot.");
+
+      App.oc.pay     = p    ? String(p)    : "";
+      App.oc.miles   = m    ? String(m)    : "";
+      App.oc.minutes = mins ? String(mins) : "";
+      App.oc.result  = analyzeValues(p, m || 1, mins, App.oc.isEV);
+    });
+  }).catch(function(err) {
+    if (myToken !== scanToken) return;
+    App.oc.scanError = (err && err.message) ? err.message : "Something went wrong reading that screenshot.";
+  }).then(function() {
+    if (myToken === scanToken) {
+      App.oc.scanning = false;
+      render();
     }
-
-    if (!resp.ok) {
-      let detail = "";
-      try { detail = (await resp.json())?.error || ""; } catch {}
-      throw new Error(detail || `Scan error ${resp.status}`);
-    }
-
-    const parsed = await resp.json();
-    const p = Number(parsed.pay) || 0;
-    const m = Number(parsed.miles) || 0;
-    const mins = Number(parsed.minutes) || 0;
-
-    if (!p && !m) throw new Error("Couldn't find payout or mileage — try a clearer screenshot.");
-
-    App.oc.pay     = p    ? String(p)    : "";
-    App.oc.miles   = m    ? String(m)    : "";
-    App.oc.minutes = mins ? String(mins) : "";
-    App.oc.result  = analyzeValues(p, m || 1, mins, App.oc.isEV);
-  } catch (err) {
-    App.oc.scanError = err?.message || "Something went wrong reading that screenshot.";
-  } finally {
-    App.oc.scanning = false;
-    render();
-  }
+  });
 }
 
 function OrderChecker() {
-  const o = App.oc;
-  const mob = App.mobile;
-  const minDpm = o.isEV?1.7:2.0, skipDpm = o.isEV?1.3:1.5;
+  var o = App.oc;
+  var mob = App.mobile;
+  var minDpm = o.isEV ? 1.7 : 2.0, skipDpm = o.isEV ? 1.3 : 1.5;
 
-  const rules = [
-    { label:"Min $/mile",   value:`$${minDpm.toFixed(2)}`,  color:C.tealSoft },
+  var ruleData = [
+    { label:"Min $/mile",   value:"$" + minDpm.toFixed(2),  color:C.tealSoft },
     { label:"Min payout",   value:"$7.00",                   color:C.tealSoft },
     { label:"Max miles",    value:"6 mi",                    color:C.amber },
     { label:"Target pace",  value:"$30+/hr",                 color:C.amber },
-    { label:"Instant skip", value:`<$${skipDpm.toFixed(2)}`, color:C.rustSoft },
-    { label:"Top order",    value:"$10+/5mi",                color:C.tealSoft },
-  ].map(r=>`<div style="background:${C.card};padding:14px 16px">
-      <div style="font-size:11px;color:${C.sand};font-weight:600;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">${r.label}</div>
-      <div style="font-size:20px;font-family:${FD};color:${r.color};font-weight:700">${r.value}</div>
-    </div>`).join("");
+    { label:"Instant skip", value:"<$" + skipDpm.toFixed(2), color:C.rustSoft },
+    { label:"Top order",    value:"$10+/5mi",                color:C.tealSoft }
+  ];
+  var rules = ruleData.map(function(r) {
+    return '<div style="background:' + C.card + ';padding:14px 16px">' +
+      '<div style="font-size:11px;color:' + C.sand + ';font-weight:600;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">' + r.label + '</div>' +
+      '<div style="font-size:20px;font-family:' + FD + ';color:' + r.color + ';font-weight:700">' + r.value + '</div>' +
+    '</div>';
+  }).join("");
 
-  let resultHtml = "";
+  var resultHtml = "";
   if (o.result) {
-    const r = o.result;
-    const concerns = r.reasons.length ? `<div style="margin-bottom:${r.positives.length?14:0}px">
-        <div class="eyebrow" style="color:${C.rust}">Concerns</div>
-        ${r.reasons.map((x,i)=>`<div style="display:flex;gap:10px;padding:9px 0;${i<r.reasons.length-1?`border-bottom:1px solid ${C.border}`:""}"><span style="color:${C.rustSoft}">\u2717</span><span style="color:${C.creamDim};font-size:14px">${esc(x)}</span></div>`).join("")}
-      </div>` : "";
-    const pos = r.positives.length ? `<div>
-        <div class="eyebrow" style="color:${C.tealSoft}">Positives</div>
-        ${r.positives.map((x,i)=>`<div style="display:flex;gap:10px;padding:9px 0;${i<r.positives.length-1?`border-bottom:1px solid ${C.border}`:""}"><span style="color:${C.tealSoft}">\u2713</span><span style="color:${C.creamDim};font-size:14px">${esc(x)}</span></div>`).join("")}
-      </div>` : "";
+    var r = o.result;
+    var concerns = r.reasons.length ? '<div style="margin-bottom:' + (r.positives.length ? 14 : 0) + 'px">' +
+        '<div class="eyebrow" style="color:' + C.rust + '">Concerns</div>' +
+        r.reasons.map(function(x, i) {
+          return '<div style="display:flex;gap:10px;padding:9px 0;' + (i < r.reasons.length - 1 ? "border-bottom:1px solid " + C.border : "") + '"><span style="color:' + C.rustSoft + '">\u2717</span><span style="color:' + C.creamDim + ';font-size:14px">' + esc(x) + '</span></div>';
+        }).join("") +
+      '</div>' : "";
+    var pos = r.positives.length ? '<div>' +
+        '<div class="eyebrow" style="color:' + C.tealSoft + '">Positives</div>' +
+        r.positives.map(function(x, i) {
+          return '<div style="display:flex;gap:10px;padding:9px 0;' + (i < r.positives.length - 1 ? "border-bottom:1px solid " + C.border : "") + '"><span style="color:' + C.tealSoft + '">\u2713</span><span style="color:' + C.creamDim + ';font-size:14px">' + esc(x) + '</span></div>';
+        }).join("") +
+      '</div>' : "";
 
-    resultHtml = `<div class="card" style="margin-bottom:20px;border-color:${r.color}55;border-width:2px">
-      <div style="display:flex;flex-direction:${mob?"column":"row"};justify-content:space-between;align-items:${mob?"flex-start":"center"};margin-bottom:16px;gap:8px">
-        <div>
-          <div class="eyebrow">Verdict</div>
-          <div class="bignum" style="font-size:${mob?44:52}px;color:${r.color}">${r.verdict}</div>
-        </div>
-        <div style="text-align:${mob?"left":"right"}">
-          <div style="margin-bottom:6px">
-            <div class="eyebrow">$/Mile</div>
-            <div class="bignum" style="font-size:26px;color:${r.color}">$${r.dpm.toFixed(2)}</div>
-          </div>
-          ${r.hrlyRate!==null?`<div>
-            <div class="eyebrow">$/Hour (this order)</div>
-            <div class="bignum" style="font-size:26px;color:${r.hrlyRate>=30?C.tealSoft:C.rustSoft}">$${r.hrlyRate.toFixed(0)}</div>
-          </div>`:""}
-        </div>
-      </div>
-      ${concerns}${pos}
-    </div>`;
+    resultHtml = '<div class="card" style="margin-bottom:20px;border-color:' + r.color + '55;border-width:2px">' +
+      '<div style="display:flex;flex-direction:' + (mob ? "column" : "row") + ';justify-content:space-between;align-items:' + (mob ? "flex-start" : "center") + ';margin-bottom:16px;gap:8px">' +
+        '<div>' +
+          '<div class="eyebrow">Verdict</div>' +
+          '<div class="bignum" style="font-size:' + (mob ? 44 : 52) + 'px;color:' + r.color + '">' + r.verdict + '</div>' +
+        '</div>' +
+        '<div style="text-align:' + (mob ? "left" : "right") + '">' +
+          '<div style="margin-bottom:6px">' +
+            '<div class="eyebrow">$/Mile</div>' +
+            '<div class="bignum" style="font-size:26px;color:' + r.color + '">$' + r.dpm.toFixed(2) + '</div>' +
+          '</div>' +
+          (r.hrlyRate !== null ? '<div>' +
+            '<div class="eyebrow">$/Hour (this order)</div>' +
+            '<div class="bignum" style="font-size:26px;color:' + (r.hrlyRate >= 30 ? C.tealSoft : C.rustSoft) + '">$' + r.hrlyRate.toFixed(0) + '</div>' +
+          '</div>' : "") +
+        '</div>' +
+      '</div>' +
+      concerns + pos +
+    '</div>';
   }
 
-  // Build the scan card (photo mode) or manual entry card depending on mode
-  let inputSection;
+  var inputSection;
   if (o.mode === "photo") {
-    const preview = o.imgPreview
-      ? `<div style="margin-bottom:16px;border-radius:12px;overflow:hidden;border:1px solid ${C.border}">
-           <img src="${o.imgPreview}" alt="Order screenshot" style="width:100%;display:block;max-height:220px;object-fit:cover" />
-         </div>` : "";
+    var preview = o.imgPreview ?
+      '<div style="margin-bottom:16px;border-radius:12px;overflow:hidden;border:1px solid ' + C.border + '">' +
+        '<img src="' + o.imgPreview + '" alt="Order screenshot" style="width:100%;display:block;max-height:220px;object-fit:cover" />' +
+      '</div>' : "";
 
-    const scanningNote = o.scanning
-      ? `<div style="margin-top:12px;font-size:13px;color:${C.muted};text-align:center">Extracting payout, distance, and delivery time…</div>` : "";
+    var scanningNote = o.scanning ?
+      '<div style="margin-top:12px;font-size:13px;color:' + C.muted + ';text-align:center">Extracting payout, distance, and delivery time…</div>' : "";
 
-    const errorBlock = o.scanError
-      ? `<div style="margin-top:14px">
-           <div style="font-size:13px;color:${C.rustSoft};margin-bottom:10px">${esc(o.scanError)}</div>
-           <button data-mode="manual" style="width:100%;padding:10px 16px;border-radius:10px;border:1px solid ${C.border};background:transparent;color:${C.amber};font-size:12px;font-weight:700;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase">Switch to Manual Entry \u2192</button>
-         </div>` : "";
+    var errorBlock = o.scanError ?
+      '<div style="margin-top:14px">' +
+        '<div style="font-size:13px;color:' + C.rustSoft + ';margin-bottom:10px">' + esc(o.scanError) + '</div>' +
+        '<button data-mode="manual" style="width:100%;padding:10px 16px;border-radius:10px;border:1px solid ' + C.border + ';background:transparent;color:' + C.amber + ';font-size:12px;font-weight:700;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase">Switch to Manual Entry \u2192</button>' +
+      '</div>' : "";
 
-    const okNote = (!o.scanning && !o.scanError && o.result)
-      ? `<div style="margin-top:12px;font-size:13px;color:${C.tealSoft}">\u2713 Read: ${o.pay||"0"} \u00B7 ${o.miles||"0"} mi \u00B7 ${o.minutes||"0"} min</div>` : "";
+    var okNote = (!o.scanning && !o.scanError && o.result) ?
+      '<div style="margin-top:12px;font-size:13px;color:' + C.tealSoft + '">\u2713 Read: $' + (o.pay || "0") + ' \u00B7 ' + (o.miles || "0") + ' mi \u00B7 ' + (o.minutes || "0") + ' min</div>' : "";
 
-    inputSection = `<div class="card" style="margin-bottom:20px">
-        <div class="eyebrow" style="margin-bottom:14px">Scan Order Screen</div>
-        ${preview}
-        <label style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:18px 24px;border-radius:14px;border:1.5px dashed ${C.amberDim};background:${C.amber}0c;color:${o.scanning?C.muted:C.amber};font-size:14px;font-weight:700;cursor:${o.scanning?"not-allowed":"pointer"};letter-spacing:0.04em;text-transform:uppercase;box-sizing:border-box">
-          <span style="font-size:18px">${o.scanning?"\u23F3":"\uD83D\uDCF7"}</span>
-          ${o.scanning?"Reading order\u2026":(o.imgPreview?"Retake Photo":"Take or Upload Photo")}
-          <input type="file" accept="image/*" capture="environment" id="scanInput" style="display:none" ${o.scanning?"disabled":""} />
-        </label>
-        ${scanningNote}${errorBlock}${okNote}
-      </div>`;
+    inputSection = '<div class="card" style="margin-bottom:20px">' +
+        '<div class="eyebrow" style="margin-bottom:14px">Scan Order Screen</div>' +
+        preview +
+        '<label style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:18px 24px;border-radius:14px;border:1.5px dashed ' + C.amberDim + ';background:' + C.amber + '0c;color:' + (o.scanning ? C.muted : C.amber) + ';font-size:14px;font-weight:700;cursor:' + (o.scanning ? "not-allowed" : "pointer") + ';letter-spacing:0.04em;text-transform:uppercase;box-sizing:border-box">' +
+          '<span style="font-size:18px">' + (o.scanning ? "\u23F3" : "\uD83D\uDCF7") + '</span>' +
+          (o.scanning ? "Reading order\u2026" : (o.imgPreview ? "Retake Photo" : "Take or Upload Photo")) +
+          '<input type="file" accept="image/*" capture="environment" id="scanInput" style="display:none" ' + (o.scanning ? "disabled" : "") + ' />' +
+        '</label>' +
+        scanningNote + errorBlock + okNote +
+      '</div>';
   } else {
-    inputSection = `<div class="card" style="margin-bottom:16px">
-        <div class="eyebrow" style="margin-bottom:14px">Order Details</div>
-        <div class="col">
-          ${ninput({key:"oc.pay",label:"Payout",prefix:"$",placeholder:"8.50"})}
-          ${ninput({key:"oc.miles",label:"Distance (miles)",placeholder:"4.2"})}
-          <div>
-            ${ninput({key:"oc.minutes",label:"Delivery Time (min)",placeholder:"18"})}
-            <div style="font-size:12px;color:${C.muted};margin-top:6px;line-height:1.5">The estimated total delivery time shown on the order \u2014 used to calculate your $/hr for this specific order.</div>
-          </div>
-        </div>
-      </div>
-      <button class="primary-btn" id="analyzeBtn" style="margin-bottom:20px">Analyze This Order</button>`;
+    inputSection = '<div class="card" style="margin-bottom:16px">' +
+        '<div class="eyebrow" style="margin-bottom:14px">Order Details</div>' +
+        '<div class="col">' +
+          ninput({key:"oc.pay", label:"Payout", prefix:"$", placeholder:"8.50"}) +
+          ninput({key:"oc.miles", label:"Distance (miles)", placeholder:"4.2"}) +
+          '<div>' +
+            ninput({key:"oc.minutes", label:"Delivery Time (min)", placeholder:"18"}) +
+            '<div style="font-size:12px;color:' + C.muted + ';margin-top:6px;line-height:1.5">The estimated total delivery time shown on the order \u2014 used to calculate your $/hr for this specific order.</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<button class="primary-btn" id="analyzeBtn" style="margin-bottom:20px">Analyze This Order</button>';
   }
 
-  return pageHead("Decision Tool","Order Checker","Snap a photo of the order screen, or enter details manually.") + `
-    ${toggle({key:"oc.isEV",leftLabel:"Gas",rightLabel:"Electric",leftIcon:"\u26FD",rightIcon:"\u26A1",value:o.isEV})}
-    ${toggle({key:"oc.mode",leftLabel:"Photo",rightLabel:"Manual",leftIcon:"\uD83D\uDCF7",rightIcon:"\u270F\uFE0F",value:o.mode==="manual"})}
-
-    ${inputSection}
-
-    ${resultHtml}
-
-    <div class="card">
-      <div class="eyebrow" style="margin-bottom:14px">Filter Rules${o.isEV?" (EV-adjusted)":""}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:${C.border};border-radius:12px;overflow:hidden">${rules}</div>
-    </div>`;
+  return pageHead("Decision Tool", "Order Checker", "Snap a photo of the order screen, or enter details manually.") +
+    toggle({key:"oc.isEV", leftLabel:"Gas", rightLabel:"Electric", leftIcon:"\u26FD", rightIcon:"\u26A1", value:o.isEV}) +
+    toggle({key:"oc.mode", leftLabel:"Photo", rightLabel:"Manual", leftIcon:"\uD83D\uDCF7", rightIcon:"\u270F\uFE0F", value:o.mode === "manual"}) +
+    inputSection +
+    resultHtml +
+    '<div class="card">' +
+      '<div class="eyebrow" style="margin-bottom:14px">Filter Rules' + (o.isEV ? " (EV-adjusted)" : "") + '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:' + C.border + ';border-radius:12px;overflow:hidden">' + rules + '</div>' +
+    '</div>';
 }
 
 /* ── SCHEDULE ── */
 function Schedule() {
-  const s = App.sc;
-  const mob = App.mobile;
-  const SHIFTS = [
+  var s = App.sc;
+  var mob = App.mobile;
+  var shiftData = [
     { name:"Lunch Rush",  badge:"Tier 2", days:"Mon\u2013Fri",  time:"10:30 AM \u2013 2:00 PM", rating:8,  color:C.amber,    note:"Office clusters are the underrated edge." },
     { name:"Dinner Rush", badge:"Tier 1", days:"Every Day",     time:"4:30 PM \u2013 9:00 PM",  rating:10, color:C.tealSoft, note:"The highest-value window. Protect it." },
-    { name:"Late Night",  badge:"Tier 3", days:"Fri \u2013 Sat", time:"9:00 PM \u2013 1:00 AM",  rating:7,  color:C.creamDim, note:"Best in college towns and dense cities." },
-  ].map(x=>`<div class="card" style="border-top:3px solid ${x.color}">
-      <div class="row-between" style="align-items:flex-start;margin-bottom:12px">
-        <h3 style="font-family:${FD};font-size:20px;color:${C.cream}">${x.name}</h3>
-        ${pill(x.badge, x.color)}
-      </div>
-      <div style="font-size:12px;color:${C.sand};margin-bottom:2px">${x.days}</div>
-      <div style="font-size:15px;color:${C.creamDim};font-family:${FM};margin-bottom:12px">${x.time}</div>
-      ${ratingBar(x.rating, x.color)}
-      <div style="margin-top:12px;font-size:13px;color:${C.muted};font-style:italic;line-height:1.6">${x.note}</div>
-    </div>`).join("");
+    { name:"Late Night",  badge:"Tier 3", days:"Fri \u2013 Sat", time:"9:00 PM \u2013 1:00 AM",  rating:7,  color:C.creamDim, note:"Best in college towns and dense cities." }
+  ];
+  var SHIFTS = shiftData.map(function(x) {
+    return '<div class="card" style="border-top:3px solid ' + x.color + '">' +
+      '<div class="row-between" style="align-items:flex-start;margin-bottom:12px">' +
+        '<h3 style="font-family:' + FD + ';font-size:20px;color:' + C.cream + '">' + x.name + '</h3>' +
+        pill(x.badge, x.color) +
+      '</div>' +
+      '<div style="font-size:12px;color:' + C.sand + ';margin-bottom:2px">' + x.days + '</div>' +
+      '<div style="font-size:15px;color:' + C.creamDim + ';font-family:' + FM + ';margin-bottom:12px">' + x.time + '</div>' +
+      ratingBar(x.rating, x.color) +
+      '<div style="margin-top:12px;font-size:13px;color:' + C.muted + ';font-style:italic;line-height:1.6">' + x.note + '</div>' +
+    '</div>';
+  }).join("");
 
-  const AVOID = [
+  var avoidData = [
     { time:"2:00 PM \u2013 4:30 PM", reason:"Dead zone \u2014 low volume, poor order quality" },
-    { time:"7:00 AM \u2013 9:00 AM", reason:"Breakfast earns less \u2014 low tips, small tickets" },
-  ].map((a,i,arr)=>`<div style="padding:12px 0;${i<arr.length-1?`border-bottom:1px solid ${C.border}`:""}">
-      <div style="font-size:14px;color:${C.rustSoft};font-family:${FM};margin-bottom:4px">${a.time}</div>
-      <div style="font-size:13px;color:${C.muted}">${a.reason}</div>
-    </div>`).join("");
+    { time:"7:00 AM \u2013 9:00 AM", reason:"Breakfast earns less \u2014 low tips, small tickets" }
+  ];
+  var AVOID = avoidData.map(function(a, i) {
+    return '<div style="padding:12px 0;' + (i < avoidData.length - 1 ? "border-bottom:1px solid " + C.border : "") + '">' +
+      '<div style="font-size:14px;color:' + C.rustSoft + ';font-family:' + FM + ';margin-bottom:4px">' + a.time + '</div>' +
+      '<div style="font-size:13px;color:' + C.muted + '">' + a.reason + '</div>' +
+    '</div>';
+  }).join("");
 
-  const ALL_DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-  const dayBtns = ALL_DAYS.map(d=>`<button class="day-btn ${s.days.includes(d)?"active":""}" data-day="${d}">${d}</button>`).join("");
-  const hrs = s.days.length*3.5, projGross = hrs*35, projNet = hrs*27;
+  var ALL_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  var dayBtns = ALL_DAYS.map(function(d) {
+    return '<button class="day-btn ' + (s.days.indexOf(d) !== -1 ? "active" : "") + '" data-day="' + d + '">' + d + '</button>';
+  }).join("");
+  var hrs = s.days.length * 3.5, projGross = hrs * 35, projNet = hrs * 27;
 
-  const planStats = [
-    { label:"Peak Hours", value:`${hrs.toFixed(1)} hrs` },
-    { label:"Est. Gross", value:`$${projGross.toFixed(0)}` },
-    { label:"Est. Net",   value:`$${projNet.toFixed(0)}` },
-  ].map(x=>`<div style="text-align:center">
-      <div class="eyebrow" style="margin-bottom:4px">${x.label}</div>
-      <div class="bignum" style="font-size:22px;color:${C.amber}">${x.value}</div>
-    </div>`).join("");
+  var planData = [
+    { label:"Peak Hours", value:hrs.toFixed(1) + " hrs" },
+    { label:"Est. Gross", value:"$" + projGross.toFixed(0) },
+    { label:"Est. Net",   value:"$" + projNet.toFixed(0) }
+  ];
+  var planStats = planData.map(function(x) {
+    return '<div style="text-align:center">' +
+      '<div class="eyebrow" style="margin-bottom:4px">' + x.label + '</div>' +
+      '<div class="bignum" style="font-size:22px;color:' + C.amber + '">' + x.value + '</div>' +
+    '</div>';
+  }).join("");
 
-  return pageHead("Peak Hours","Shift Schedule","Only three windows are worth your time.") + `
-    <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:20px">${SHIFTS}</div>
-
-    <div class="card" style="margin-bottom:16px">
-      <div class="eyebrow" style="color:${C.rust};margin-bottom:12px">Windows to Avoid</div>${AVOID}
-    </div>
-
-    <div class="card">
-      <div class="eyebrow" style="margin-bottom:14px">Weekly Planner</div>
-      <div style="display:flex;gap:${mob?6:8}px;margin-bottom:20px;flex-wrap:wrap">${dayBtns}</div>
-      <div class="divider" style="margin-bottom:16px"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">${planStats}</div>
-    </div>`;
+  return pageHead("Peak Hours", "Shift Schedule", "Only three windows are worth your time.") +
+    '<div style="display:flex;flex-direction:column;gap:14px;margin-bottom:20px">' + SHIFTS + '</div>' +
+    '<div class="card" style="margin-bottom:16px">' +
+      '<div class="eyebrow" style="color:' + C.rust + ';margin-bottom:12px">Windows to Avoid</div>' + AVOID +
+    '</div>' +
+    '<div class="card">' +
+      '<div class="eyebrow" style="margin-bottom:14px">Weekly Planner</div>' +
+      '<div style="display:flex;gap:' + (mob ? 6 : 8) + 'px;margin-bottom:20px;flex-wrap:wrap">' + dayBtns + '</div>' +
+      '<div class="divider" style="margin-bottom:16px"></div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">' + planStats + '</div>' +
+    '</div>';
 }
 
 /* ── EXPENSES ── */
 function Expenses() {
-  const e = App.ex;
-  const mi=num(e.wkMiles), dep=num(e.depRate);
-  const gasFuel = (mi/(num(e.mpg,1)))*num(e.gasPrice);
-  const fastPct = num(e.fastChargePct)/100;
-  const blendedRate = (num(e.elecPrice)*(1-fastPct)) + (num(e.fastChargePrice)*fastPct);
-  const evFuel = (mi/100)*num(e.kwhPer100)*blendedRate;
-  const fuelCost = e.isEV?evFuel:gasFuel;
-  const maint = mi*(e.isEV?0.025:0.05);
-  const tires = mi*(e.isEV?0.025:0.02);
-  const deprec = mi*dep;
-  const ins = 20;
-  const total = fuelCost+maint+tires+deprec+ins;
-  const cpm = mi>0?total/mi:0;
-  const taxDed = mi*0.67;
+  var e = App.ex;
+  var mi = num(e.wkMiles), dep = num(e.depRate);
+  var gasFuel = (mi / num(e.mpg, 1)) * num(e.gasPrice);
+  var fastPct = num(e.fastChargePct) / 100;
+  var blendedRate = (num(e.elecPrice) * (1 - fastPct)) + (num(e.fastChargePrice) * fastPct);
+  var evFuel = (mi / 100) * num(e.kwhPer100) * blendedRate;
+  var fuelCost = e.isEV ? evFuel : gasFuel;
+  var maint = mi * (e.isEV ? 0.025 : 0.05);
+  var tires = mi * (e.isEV ? 0.025 : 0.02);
+  var deprec = mi * dep;
+  var ins = 20;
+  var total = fuelCost + maint + tires + deprec + ins;
+  var cpm = mi > 0 ? total / mi : 0;
+  var taxDed = mi * 0.67;
 
-  const inputs = e.isEV ? `
-    ${ninput({key:"ex.kwhPer100",label:"kWh per 100 mi",placeholder:"30"})}
-    ${ninput({key:"ex.elecPrice",label:"Home Rate ($/kWh)",prefix:"$",placeholder:"0.16"})}
-    ${ninput({key:"ex.fastChargePct",label:"% DC Fast Charged",placeholder:"20"})}
-    ${ninput({key:"ex.fastChargePrice",label:"Fast Charge ($/kWh)",prefix:"$",placeholder:"0.42"})}
-    ${ninput({key:"ex.wkMiles",label:"Weekly Miles",placeholder:"300"})}
-    ${ninput({key:"ex.depRate",label:"Depreciation ($/mi)",prefix:"$",placeholder:"0.07"})}
-  ` : `
-    ${ninput({key:"ex.mpg",label:"Vehicle MPG",placeholder:"28"})}
-    ${ninput({key:"ex.gasPrice",label:"Gas ($/gal)",prefix:"$",placeholder:"3.50"})}
-    ${ninput({key:"ex.wkMiles",label:"Weekly Miles",placeholder:"300"})}
-    ${ninput({key:"ex.depRate",label:"Depreciation ($/mi)",prefix:"$",placeholder:"0.07"})}
-  `;
+  var inputs = e.isEV ?
+    ninput({key:"ex.kwhPer100", label:"kWh per 100 mi", placeholder:"30"}) +
+    ninput({key:"ex.elecPrice", label:"Home Rate ($/kWh)", prefix:"$", placeholder:"0.16"}) +
+    ninput({key:"ex.fastChargePct", label:"% DC Fast Charged", placeholder:"20"}) +
+    ninput({key:"ex.fastChargePrice", label:"Fast Charge ($/kWh)", prefix:"$", placeholder:"0.42"}) +
+    ninput({key:"ex.wkMiles", label:"Weekly Miles", placeholder:"300"}) +
+    ninput({key:"ex.depRate", label:"Depreciation ($/mi)", prefix:"$", placeholder:"0.07"})
+  :
+    ninput({key:"ex.mpg", label:"Vehicle MPG", placeholder:"28"}) +
+    ninput({key:"ex.gasPrice", label:"Gas ($/gal)", prefix:"$", placeholder:"3.50"}) +
+    ninput({key:"ex.wkMiles", label:"Weekly Miles", placeholder:"300"}) +
+    ninput({key:"ex.depRate", label:"Depreciation ($/mi)", prefix:"$", placeholder:"0.07"});
 
-  const blendedCard = e.isEV ? `<div class="card" style="margin-bottom:16px;border-color:${C.teal}44">
-      <div class="eyebrow" style="color:${C.tealSoft}">Blended Electricity Rate</div>
-      <div class="bignum" style="font-size:26px;color:${C.tealSoft}">$${blendedRate.toFixed(3)}/kWh</div>
-      <div style="margin-top:6px;font-size:12px;color:${C.muted}">${e.fastChargePct}% fast-charger use blended with home charging rate</div>
-    </div>` : "";
+  var blendedCard = e.isEV ? '<div class="card" style="margin-bottom:16px;border-color:' + C.teal + '44">' +
+      '<div class="eyebrow" style="color:' + C.tealSoft + '">Blended Electricity Rate</div>' +
+      '<div class="bignum" style="font-size:26px;color:' + C.tealSoft + '">$' + blendedRate.toFixed(3) + '/kWh</div>' +
+      '<div style="margin-top:6px;font-size:12px;color:' + C.muted + '">' + e.fastChargePct + '% fast-charger use blended with home charging rate</div>' +
+    '</div>' : "";
 
-  const breakdown = [
-    { label:e.isEV?"Electricity":"Fuel", val:fuelCost },
+  var bd = [
+    { label:e.isEV ? "Electricity" : "Fuel", val:fuelCost },
     { label:"Maintenance Reserve", val:maint },
     { label:"Tire Reserve", val:tires },
     { label:"Depreciation", val:deprec },
-    { label:"Insurance Share", val:ins },
-  ].map((b,i,arr)=>`<div>
-      <div class="row-between" style="padding:11px 0">
-        <span style="color:${C.creamDim};font-size:15px">${b.label}</span>
-        <span style="color:${C.cream};font-size:15px;font-family:${FM}">$${b.val.toFixed(2)}</span>
-      </div>
-      ${i<arr.length-1?'<div class="divider"></div>':""}
-    </div>`).join("");
+    { label:"Insurance Share", val:ins }
+  ];
+  var breakdown = bd.map(function(b, i) {
+    return '<div>' +
+      '<div class="row-between" style="padding:11px 0">' +
+        '<span style="color:' + C.creamDim + ';font-size:15px">' + b.label + '</span>' +
+        '<span style="color:' + C.cream + ';font-size:15px;font-family:' + FM + '">$' + b.val.toFixed(2) + '</span>' +
+      '</div>' +
+      (i < bd.length - 1 ? '<div class="divider"></div>' : "") +
+    '</div>';
+  }).join("");
 
-  const evNotes = e.isEV ? `<div class="card" style="margin-bottom:16px;border-color:${C.tealSoft}33">
-      <div class="eyebrow" style="color:${C.tealSoft}">EV Driver Notes</div>
-      <div style="font-size:14px;color:${C.creamDim};line-height:1.7">Charge at home overnight whenever possible \u2014 DC fast chargers cost 2\u20133\u00D7 more per kWh. Regenerative braking also means brake pads last far longer than on gas vehicles.</div>
-    </div>` : "";
+  var evNotes = e.isEV ? '<div class="card" style="margin-bottom:16px;border-color:' + C.tealSoft + '33">' +
+      '<div class="eyebrow" style="color:' + C.tealSoft + '">EV Driver Notes</div>' +
+      '<div style="font-size:14px;color:' + C.creamDim + ';line-height:1.7">Charge at home overnight whenever possible \u2014 DC fast chargers cost 2\u20133\u00D7 more per kWh. Regenerative braking also means brake pads last far longer than on gas vehicles.</div>' +
+    '</div>' : "";
 
-  const deductions = [
+  var ded = [
     "Mileage deduction \u2014 usually your largest write-off",
     "Phone bill \u2014 business-use % only",
     "Phone mount & accessories",
     "Hot bags & insulated carriers",
-    "Parking & tolls (business only)",
-    ...(e.isEV?["Home charging equipment (business-use %)"]:[]),
-  ].map(item=>`<div class="checklist-item">
-      <div class="checklist-box"><div class="dot"></div></div>
-      <span style="font-size:14px;color:${C.creamDim};line-height:1.5">${item}</span>
-    </div>`).join("");
+    "Parking & tolls (business only)"
+  ];
+  if (e.isEV) ded.push("Home charging equipment (business-use %)");
+  var deductions = ded.map(function(item) {
+    return '<div class="checklist-item">' +
+      '<div class="checklist-box"><div class="dot"></div></div>' +
+      '<span style="font-size:14px;color:' + C.creamDim + ';line-height:1.5">' + item + '</span>' +
+    '</div>';
+  }).join("");
 
-  return pageHead("Vehicle Cost Tracker","Expenses","Know your real cost per mile. Gross pay means nothing without it.") + `
-    ${toggle({key:"ex.isEV",leftLabel:"Gas",rightLabel:"Electric",leftIcon:"\u26FD",rightIcon:"\u26A1",value:e.isEV})}
-
-    <div class="grid2" style="margin-bottom:20px">${inputs}</div>
-    ${blendedCard}
-
-    <div class="card" style="margin-bottom:16px">
-      <div class="eyebrow" style="margin-bottom:14px">Weekly Cost Breakdown</div>
-      ${breakdown}
-      <div style="margin-top:10px;padding-top:14px;border-top:2px solid ${C.border}" class="row-between">
-        <span style="color:${C.cream};font-weight:700">Total Weekly</span>
-        <div class="bignum" style="font-size:28px;color:${C.rustSoft}">$${total.toFixed(2)}</div>
-      </div>
-    </div>
-
-    <div class="grid2" style="margin-bottom:16px">
-      <div class="card glow">
-        <div class="eyebrow">Cost Per Mile</div>
-        <div class="bignum" style="font-size:30px;color:${cpm<=(e.isEV?0.18:0.25)?C.tealSoft:cpm<=(e.isEV?0.28:0.35)?C.amber:C.rustSoft}">$${cpm.toFixed(3)}</div>
-        <div style="margin-top:6px;font-size:12px;color:${C.muted}">Target: under $${e.isEV?"0.18":"0.25"}</div>
-      </div>
-      <div class="card">
-        <div class="eyebrow">IRS Mileage Deduction</div>
-        <div class="bignum" style="font-size:30px;color:${C.amber}">$${taxDed.toFixed(2)}</div>
-        <div style="margin-top:6px;font-size:12px;color:${C.muted}">${e.wkMiles} mi \u00D7 $0.67/mi</div>
-      </div>
-    </div>
-
-    ${evNotes}
-
-    <div class="card" style="margin-bottom:16px;border-color:${C.amber}44">
-      <div class="eyebrow" style="color:${C.amber}">Tax Reserve Reminder</div>
-      <div style="font-size:14px;color:${C.creamDim};line-height:1.7">Transfer <span style="color:${C.amber};font-weight:600">20% of gross weekly</span> into a separate account. Don't wait until April.</div>
-    </div>
-
-    <div class="card">
-      <div class="eyebrow" style="margin-bottom:14px">Tax Deduction Checklist</div>
-      <div class="checklist">${deductions}</div>
-    </div>`;
+  return pageHead("Vehicle Cost Tracker", "Expenses", "Know your real cost per mile. Gross pay means nothing without it.") +
+    toggle({key:"ex.isEV", leftLabel:"Gas", rightLabel:"Electric", leftIcon:"\u26FD", rightIcon:"\u26A1", value:e.isEV}) +
+    '<div class="grid2" style="margin-bottom:20px">' + inputs + '</div>' +
+    blendedCard +
+    '<div class="card" style="margin-bottom:16px">' +
+      '<div class="eyebrow" style="margin-bottom:14px">Weekly Cost Breakdown</div>' +
+      breakdown +
+      '<div style="margin-top:10px;padding-top:14px;border-top:2px solid ' + C.border + '" class="row-between">' +
+        '<span style="color:' + C.cream + ';font-weight:700">Total Weekly</span>' +
+        '<div class="bignum" style="font-size:28px;color:' + C.rustSoft + '">$' + total.toFixed(2) + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="grid2" style="margin-bottom:16px">' +
+      '<div class="card glow">' +
+        '<div class="eyebrow">Cost Per Mile</div>' +
+        '<div class="bignum" style="font-size:30px;color:' + (cpm <= (e.isEV ? 0.18 : 0.25) ? C.tealSoft : cpm <= (e.isEV ? 0.28 : 0.35) ? C.amber : C.rustSoft) + '">$' + cpm.toFixed(3) + '</div>' +
+        '<div style="margin-top:6px;font-size:12px;color:' + C.muted + '">Target: under $' + (e.isEV ? "0.18" : "0.25") + '</div>' +
+      '</div>' +
+      '<div class="card">' +
+        '<div class="eyebrow">IRS Mileage Deduction</div>' +
+        '<div class="bignum" style="font-size:30px;color:' + C.amber + '">$' + taxDed.toFixed(2) + '</div>' +
+        '<div style="margin-top:6px;font-size:12px;color:' + C.muted + '">' + e.wkMiles + ' mi \u00D7 $0.67/mi</div>' +
+      '</div>' +
+    '</div>' +
+    evNotes +
+    '<div class="card" style="margin-bottom:16px;border-color:' + C.amber + '44">' +
+      '<div class="eyebrow" style="color:' + C.amber + '">Tax Reserve Reminder</div>' +
+      '<div style="font-size:14px;color:' + C.creamDim + ';line-height:1.7">Transfer <span style="color:' + C.amber + ';font-weight:600">20% of gross weekly</span> into a separate account. Don\'t wait until April.</div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<div class="eyebrow" style="margin-bottom:14px">Tax Deduction Checklist</div>' +
+      '<div class="checklist">' + deductions + '</div>' +
+    '</div>';
 }
 
 /* ── CALCULATOR ── */
 function Calculator() {
-  const c = App.cl;
-  const aov = num(c.base)+num(c.tip)+num(c.peakPay);
-  const grossHr = num(c.dph)*aov;
-  const milesHr = num(c.dph)*num(c.mpd);
-  const gasFuelHr = (milesHr/num(c.mpg,1))*num(c.gasP);
-  const evFuelHr = (milesHr/100)*num(c.kwhPer100)*num(c.elecPrice);
-  const fuelHr = c.isEV?evFuelHr:gasFuelHr;
-  const depHr = milesHr*num(c.depM);
-  const maintHr = milesHr*(c.isEV?0.025:0.05);
-  const totalExp = fuelHr+depHr+maintHr;
-  const netHr = grossHr-totalExp;
-  const dpm = milesHr>0?grossHr/milesHr:0;
-  const shortfall = Math.max(0,30-netHr);
-  const neededGross = totalExp+30;
-  const neededAov = num(c.dph)>0?neededGross/num(c.dph):0;
-  const netColor = netHr>=30?C.tealSoft:netHr>=20?C.amber:C.rustSoft;
+  var c = App.cl;
+  var aov = num(c.base) + num(c.tip) + num(c.peakPay);
+  var grossHr = num(c.dph) * aov;
+  var milesHr = num(c.dph) * num(c.mpd);
+  var gasFuelHr = (milesHr / num(c.mpg, 1)) * num(c.gasP);
+  var evFuelHr = (milesHr / 100) * num(c.kwhPer100) * num(c.elecPrice);
+  var fuelHr = c.isEV ? evFuelHr : gasFuelHr;
+  var depHr = milesHr * num(c.depM);
+  var maintHr = milesHr * (c.isEV ? 0.025 : 0.05);
+  var totalExp = fuelHr + depHr + maintHr;
+  var netHr = grossHr - totalExp;
+  var dpm = milesHr > 0 ? grossHr / milesHr : 0;
+  var shortfall = Math.max(0, 30 - netHr);
+  var neededGross = totalExp + 30;
+  var neededAov = num(c.dph) > 0 ? neededGross / num(c.dph) : 0;
+  var netColor = netHr >= 30 ? C.tealSoft : netHr >= 20 ? C.amber : C.rustSoft;
 
-  const vehInputs = c.isEV ? `
-    ${ninput({key:"cl.kwhPer100",label:"kWh per 100 mi",placeholder:"30"})}
-    ${ninput({key:"cl.elecPrice",label:"Electricity ($/kWh)",prefix:"$",placeholder:"0.16"})}
-    ${ninput({key:"cl.depM",label:"Depreciation ($/mi)",prefix:"$",placeholder:"0.07"})}
-  ` : `
-    ${ninput({key:"cl.gasP",label:"Gas Price ($/gal)",prefix:"$",placeholder:"3.50"})}
-    ${ninput({key:"cl.mpg",label:"Vehicle MPG",placeholder:"28"})}
-    ${ninput({key:"cl.depM",label:"Depreciation ($/mi)",prefix:"$",placeholder:"0.07"})}
-  `;
+  var vehInputs = c.isEV ?
+    ninput({key:"cl.kwhPer100", label:"kWh per 100 mi", placeholder:"30"}) +
+    ninput({key:"cl.elecPrice", label:"Electricity ($/kWh)", prefix:"$", placeholder:"0.16"}) +
+    ninput({key:"cl.depM", label:"Depreciation ($/mi)", prefix:"$", placeholder:"0.07"})
+  :
+    ninput({key:"cl.gasP", label:"Gas Price ($/gal)", prefix:"$", placeholder:"3.50"}) +
+    ninput({key:"cl.mpg", label:"Vehicle MPG", placeholder:"28"}) +
+    ninput({key:"cl.depM", label:"Depreciation ($/mi)", prefix:"$", placeholder:"0.07"});
 
-  const grid = [
-    { label:"Gross / Hour",    value:`$${grossHr.toFixed(2)}`,  color:C.cream },
-    { label:"Expenses / Hour", value:`$${totalExp.toFixed(2)}`, color:C.rustSoft },
-    { label:"Avg Order Value", value:`$${aov.toFixed(2)}`,      color:C.amber },
-    { label:"$/Mile", value:`$${dpm.toFixed(2)}`, color:dpm>=2?C.tealSoft:C.rustSoft, sub:dpm>=2?"Above minimum":"Below $2 target" },
-  ].map(x=>`<div class="card">
-      <div class="eyebrow">${x.label}</div>
-      <div class="bignum" style="font-size:26px;color:${x.color}">${x.value}</div>
-      ${x.sub?`<div style="margin-top:6px;font-size:12px;color:${C.muted}">${x.sub}</div>`:""}
-    </div>`).join("");
+  var gridData = [
+    { label:"Gross / Hour",    value:"$" + grossHr.toFixed(2),  color:C.cream },
+    { label:"Expenses / Hour", value:"$" + totalExp.toFixed(2), color:C.rustSoft },
+    { label:"Avg Order Value", value:"$" + aov.toFixed(2),      color:C.amber },
+    { label:"$/Mile", value:"$" + dpm.toFixed(2), color:dpm >= 2 ? C.tealSoft : C.rustSoft, sub:dpm >= 2 ? "Above minimum" : "Below $2 target" }
+  ];
+  var grid = gridData.map(function(x) {
+    return '<div class="card">' +
+      '<div class="eyebrow">' + x.label + '</div>' +
+      '<div class="bignum" style="font-size:26px;color:' + x.color + '">' + x.value + '</div>' +
+      (x.sub ? '<div style="margin-top:6px;font-size:12px;color:' + C.muted + '">' + x.sub + '</div>' : "") +
+    '</div>';
+  }).join("");
 
-  const needed = [
-    { label:"Required Gross/Hr",   val:`$${neededGross.toFixed(2)}` },
-    { label:"Required Avg Order",  val:`$${neededAov.toFixed(2)}` },
-    { label:"Hourly Vehicle Cost", val:`$${totalExp.toFixed(2)}` },
-    { label:"Miles Driven/Hr",     val:`${milesHr.toFixed(1)} mi` },
-  ].map((x,i,arr)=>`<div>
-      <div class="row-between" style="padding:11px 0">
-        <span style="color:${C.muted};font-size:14px">${x.label}</span>
-        <span style="color:${C.cream};font-size:14px;font-family:${FM}">${x.val}</span>
-      </div>
-      ${i<arr.length-1?'<div class="divider"></div>':""}
-    </div>`).join("");
+  var neededData = [
+    { label:"Required Gross/Hr",   val:"$" + neededGross.toFixed(2) },
+    { label:"Required Avg Order",  val:"$" + neededAov.toFixed(2) },
+    { label:"Hourly Vehicle Cost", val:"$" + totalExp.toFixed(2) },
+    { label:"Miles Driven/Hr",     val:milesHr.toFixed(1) + " mi" }
+  ];
+  var needed = neededData.map(function(x, i) {
+    return '<div>' +
+      '<div class="row-between" style="padding:11px 0">' +
+        '<span style="color:' + C.muted + ';font-size:14px">' + x.label + '</span>' +
+        '<span style="color:' + C.cream + ';font-size:14px;font-family:' + FM + '">' + x.val + '</span>' +
+      '</div>' +
+      (i < neededData.length - 1 ? '<div class="divider"></div>' : "") +
+    '</div>';
+  }).join("");
 
-  return pageHead("Earnings Model","$30/Hr Calculator","Plug in your averages. See exactly what you need to hit $30 net.") + `
-    ${toggle({key:"cl.isEV",leftLabel:"Gas",rightLabel:"Electric",leftIcon:"\u26FD",rightIcon:"\u26A1",value:c.isEV})}
-
-    <div class="card" style="margin-bottom:16px">
-      <div class="eyebrow" style="margin-bottom:14px">Delivery Metrics</div>
-      <div class="col">
-        ${ninput({key:"cl.dph",label:"Deliveries per Hour",placeholder:"3"})}
-        ${ninput({key:"cl.base",label:"Avg Base Pay",prefix:"$",placeholder:"3.50"})}
-        ${ninput({key:"cl.tip",label:"Avg Tip",prefix:"$",placeholder:"8.00"})}
-        ${ninput({key:"cl.peakPay",label:"Avg Peak Pay per Order",prefix:"$",placeholder:"0.00"})}
-        ${ninput({key:"cl.mpd",label:"Avg Miles per Delivery",placeholder:"4"})}
-      </div>
-    </div>
-
-    <div class="card" style="margin-bottom:16px">
-      <div class="eyebrow" style="margin-bottom:14px">Vehicle Costs</div>
-      <div class="col">${vehInputs}</div>
-    </div>
-
-    <div class="card glow" style="margin-bottom:16px;border-top:3px solid ${netColor}">
-      <div class="eyebrow">Net Hourly (after vehicle costs)</div>
-      <div class="bignum" style="font-size:${fitFont('
-      <div style="margin-top:8px;font-size:14px;color:${shortfall>0?C.rust:C.tealSoft}">${shortfall>0?`$${shortfall.toFixed(2)}/hr below $30 target`:"\u2713 Hitting the $30 target"}</div>
-    </div>
-
-    <div class="grid2" style="margin-bottom:16px">${grid}</div>
-
-    <div class="card" style="border-color:${C.amber}44">
-      <div class="eyebrow" style="margin-bottom:14px">What You Need to Hit $30</div>${needed}
-    </div>`;
+  return pageHead("Earnings Model", "$30/Hr Calculator", "Plug in your averages. See exactly what you need to hit $30 net.") +
+    toggle({key:"cl.isEV", leftLabel:"Gas", rightLabel:"Electric", leftIcon:"\u26FD", rightIcon:"\u26A1", value:c.isEV}) +
+    '<div class="card" style="margin-bottom:16px">' +
+      '<div class="eyebrow" style="margin-bottom:14px">Delivery Metrics</div>' +
+      '<div class="col">' +
+        ninput({key:"cl.dph", label:"Deliveries per Hour", placeholder:"3"}) +
+        ninput({key:"cl.base", label:"Avg Base Pay", prefix:"$", placeholder:"3.50"}) +
+        ninput({key:"cl.tip", label:"Avg Tip", prefix:"$", placeholder:"8.00"}) +
+        ninput({key:"cl.peakPay", label:"Avg Peak Pay per Order", prefix:"$", placeholder:"0.00"}) +
+        ninput({key:"cl.mpd", label:"Avg Miles per Delivery", placeholder:"4"}) +
+      '</div>' +
+    '</div>' +
+    '<div class="card" style="margin-bottom:16px">' +
+      '<div class="eyebrow" style="margin-bottom:14px">Vehicle Costs</div>' +
+      '<div class="col">' + vehInputs + '</div>' +
+    '</div>' +
+    '<div class="card glow" style="margin-bottom:16px;border-top:3px solid ' + netColor + '">' +
+      '<div class="eyebrow">Net Hourly (after vehicle costs)</div>' +
+      '<div class="bignum" style="font-size:' + fitFont("$" + netHr.toFixed(2), 68) + 'px;color:' + netColor + ';word-break:break-all">$' + netHr.toFixed(2) + '</div>' +
+      '<div style="margin-top:8px;font-size:14px;color:' + (shortfall > 0 ? C.rust : C.tealSoft) + '">' + (shortfall > 0 ? "$" + shortfall.toFixed(2) + "/hr below $30 target" : "\u2713 Hitting the $30 target") + '</div>' +
+    '</div>' +
+    '<div class="grid2" style="margin-bottom:16px">' + grid + '</div>' +
+    '<div class="card" style="border-color:' + C.amber + '44">' +
+      '<div class="eyebrow" style="margin-bottom:14px">What You Need to Hit $30</div>' + needed +
+    '</div>';
 }
 
 /* ── RENDER ── */
-const PANELS = [Overview, OrderChecker, Schedule, Expenses, Calculator];
+var PANELS = [Overview, OrderChecker, Schedule, Expenses, Calculator];
 
 function render() {
   App.mobile = window.innerWidth < 768;
-  const panelHtml = PANELS[App.tab]();
-  const root = $("root");
+  var panelHtml = PANELS[App.tab]();
+  var root = $("root");
 
   if (App.mobile) {
-    root.innerHTML = `
-      <div class="app">
-        <div class="topbar">
-          <div style="font-family:${FD};font-size:22px;font-weight:800;color:${C.amber}">Deliver30</div>
-          <div style="font-size:10px;color:${C.sand};margin-left:10px;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px">$30/hr System</div>
-        </div>
-        <div class="main-mobile"><div class="main-mobile-inner">${panelHtml}</div></div>
-        <div class="tabbar">
-          ${NAV.map(n=>`<button class="tab-btn ${App.tab===n.id?"active":""}" data-tab="${n.id}">
-            <span class="ic">${n.icon}</span>
-            <span class="lbl">${n.label}</span>
-            ${App.tab===n.id?'<div class="tab-underline"></div>':""}
-          </button>`).join("")}
-        </div>
-      </div>`;
+    root.innerHTML =
+      '<div class="app">' +
+        '<div class="topbar">' +
+          '<div style="font-family:' + FD + ';font-size:22px;font-weight:800;color:' + C.amber + '">Deliver30</div>' +
+          '<div style="font-size:10px;color:' + C.sand + ';margin-left:10px;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px">$30/hr System</div>' +
+        '</div>' +
+        '<div class="main-mobile"><div class="main-mobile-inner">' + panelHtml + '</div></div>' +
+        '<div class="tabbar">' +
+          NAV.map(function(n) {
+            return '<button class="tab-btn ' + (App.tab === n.id ? "active" : "") + '" data-tab="' + n.id + '">' +
+              '<span class="ic">' + n.icon + '</span>' +
+              '<span class="lbl">' + n.label + '</span>' +
+              (App.tab === n.id ? '<div class="tab-underline"></div>' : "") +
+            '</button>';
+          }).join("") +
+        '</div>' +
+      '</div>';
   } else {
-    root.innerHTML = `
-      <div class="app">
-        <div class="sidebar">
-          <div class="sidebar-brand">
-            <div style="font-family:${FD};font-size:26px;font-weight:800;color:${C.amber}">Deliver30</div>
-            <div style="font-size:11px;color:${C.sand};letter-spacing:0.1em;text-transform:uppercase;margin-top:2px">$30/hr System</div>
-          </div>
-          <nav class="sidebar-nav">
-            ${NAV.map(n=>`<button class="nav-btn ${App.tab===n.id?"active":""}" data-tab="${n.id}">
-              <span class="ic">${n.icon}</span>${n.label}
-            </button>`).join("")}
-          </nav>
-          <div class="sidebar-foot">
-            <div style="font-size:12px;color:${C.muted};line-height:1.6;font-style:italic">"Treat delivery like a logistics business, not a side gig."</div>
-          </div>
-        </div>
-        <div class="main-desktop"><div class="main-inner">${panelHtml}</div></div>
-      </div>`;
+    root.innerHTML =
+      '<div class="app">' +
+        '<div class="sidebar">' +
+          '<div class="sidebar-brand">' +
+            '<div style="font-family:' + FD + ';font-size:26px;font-weight:800;color:' + C.amber + '">Deliver30</div>' +
+            '<div style="font-size:11px;color:' + C.sand + ';letter-spacing:0.1em;text-transform:uppercase;margin-top:2px">$30/hr System</div>' +
+          '</div>' +
+          '<nav class="sidebar-nav">' +
+            NAV.map(function(n) {
+              return '<button class="nav-btn ' + (App.tab === n.id ? "active" : "") + '" data-tab="' + n.id + '">' +
+                '<span class="ic">' + n.icon + '</span>' + n.label +
+              '</button>';
+            }).join("") +
+          '</nav>' +
+          '<div class="sidebar-foot">' +
+            '<div style="font-size:12px;color:' + C.muted + ';line-height:1.6;font-style:italic">"Treat delivery like a logistics business, not a side gig."</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="main-desktop"><div class="main-inner">' + panelHtml + '</div></div>' +
+      '</div>';
   }
 
   bindEvents();
 }
 
 function bindEvents() {
-  // nav (desktop + mobile)
-  document.querySelectorAll("[data-tab]").forEach(btn=>{
-    btn.addEventListener("click",()=>{ App.tab = parseInt(btn.dataset.tab,10); render(); });
-  });
+  var tabs = document.querySelectorAll("[data-tab]");
+  for (var i = 0; i < tabs.length; i++) {
+    (function(btn) {
+      btn.addEventListener("click", function() { App.tab = parseInt(btn.getAttribute("data-tab"), 10); render(); });
+    })(tabs[i]);
+  }
 
-  // number inputs — update store live without re-render (preserve focus)
-  document.querySelectorAll("input[data-key]").forEach(inp=>{
-    inp.addEventListener("input",()=>{
-      setByKey(inp.dataset.key, inp.value);
-      saveState();
-      liveUpdate();
-    });
-  });
+  var inputs = document.querySelectorAll("input[data-key]");
+  for (var j = 0; j < inputs.length; j++) {
+    (function(inp) {
+      inp.addEventListener("input", function() {
+        setByKey(inp.getAttribute("data-key"), inp.value);
+        saveState();
+        liveUpdate();
+      });
+    })(inputs[j]);
+  }
 
-  // toggles
-  document.querySelectorAll("[data-toggle]").forEach(btn=>{
-    btn.addEventListener("click",()=>{
-      const key = btn.dataset.toggle;
-      const boolVal = btn.dataset.val === "true";
-      if (key === "oc.mode") {
-        // mode is a string, not a boolean
-        App.oc.mode = boolVal ? "manual" : "photo";
-        App.oc.scanError = null;
-      } else {
-        setByKey(key, boolVal);
-        // clear order result when switching gas/EV
-        if (key === "oc.isEV") App.oc.result = null;
-      }
-      saveState();
-      render();
-    });
-  });
+  var toggles = document.querySelectorAll("[data-toggle]");
+  for (var k = 0; k < toggles.length; k++) {
+    (function(btn) {
+      btn.addEventListener("click", function() {
+        var key = btn.getAttribute("data-toggle");
+        var boolVal = btn.getAttribute("data-val") === "true";
+        if (key === "oc.mode") {
+          App.oc.mode = boolVal ? "manual" : "photo";
+          App.oc.scanError = null;
+        } else {
+          setByKey(key, boolVal);
+          if (key === "oc.isEV") App.oc.result = null;
+        }
+        saveState();
+        render();
+      });
+    })(toggles[k]);
+  }
 
-  // tip dots
-  document.querySelectorAll("[data-tip]").forEach(d=>{
-    d.addEventListener("click",()=>{ App.ov.tipIdx = parseInt(d.dataset.tip,10); render(); });
-  });
+  var tips = document.querySelectorAll("[data-tip]");
+  for (var t = 0; t < tips.length; t++) {
+    (function(d) {
+      d.addEventListener("click", function() { App.ov.tipIdx = parseInt(d.getAttribute("data-tip"), 10); render(); });
+    })(tips[t]);
+  }
 
-  // day buttons
-  document.querySelectorAll("[data-day]").forEach(b=>{
-    b.addEventListener("click",()=>{
-      const d = b.dataset.day;
-      App.sc.days = App.sc.days.includes(d) ? App.sc.days.filter(x=>x!==d) : [...App.sc.days, d];
-      saveState();
-      render();
-    });
-  });
+  var dayBtns = document.querySelectorAll("[data-day]");
+  for (var dd = 0; dd < dayBtns.length; dd++) {
+    (function(b) {
+      b.addEventListener("click", function() {
+        var d = b.getAttribute("data-day");
+        var idx = App.sc.days.indexOf(d);
+        if (idx !== -1) App.sc.days.splice(idx, 1);
+        else App.sc.days.push(d);
+        saveState();
+        render();
+      });
+    })(dayBtns[dd]);
+  }
 
-  // analyze button
-  const ab = $("analyzeBtn");
-  if (ab) ab.addEventListener("click",()=>{
-    const o = App.oc;
-    App.oc.result = analyzeValues(num(o.pay), num(o.miles,1), num(o.minutes), o.isEV);
+  var ab = $("analyzeBtn");
+  if (ab) ab.addEventListener("click", function() {
+    var o = App.oc;
+    App.oc.result = analyzeValues(num(o.pay), num(o.miles, 1), num(o.minutes), o.isEV);
     render();
   });
 
-  // scan file input
-  const si = $("scanInput");
-  if (si) si.addEventListener("change",(e)=>{
-    const file = e.target.files && e.target.files[0];
+  var si = $("scanInput");
+  if (si) si.addEventListener("change", function(e) {
+    var file = e.target.files && e.target.files[0];
     if (file) handleScan(file);
   });
 
-  // mode buttons (photo / manual) — both the toggle and the fallback link
-  document.querySelectorAll("[data-mode]").forEach(b=>{
-    b.addEventListener("click",()=>{
-      App.oc.mode = b.dataset.mode;
-      App.oc.scanError = null;
-      render();
-    });
-  });
+  var modes = document.querySelectorAll("[data-mode]");
+  for (var mm = 0; mm < modes.length; mm++) {
+    (function(b) {
+      b.addEventListener("click", function() {
+        App.oc.mode = b.getAttribute("data-mode");
+        App.oc.scanError = null;
+        render();
+      });
+    })(modes[mm]);
+  }
 }
 
-/* re-render the live-calculated sections without losing input focus.
-   Simplest robust approach: re-render whole panel but restore focus + caret. */
 function liveUpdate() {
-  const active = document.activeElement;
-  const key = active && active.dataset ? active.dataset.key : null;
-  const caret = active && active.selectionStart != null ? active.selectionStart : null;
+  var active = document.activeElement;
+  var key = (active && active.getAttribute) ? active.getAttribute("data-key") : null;
+  var caret = (active && active.selectionStart != null) ? active.selectionStart : null;
 
-  // Re-render only the panel content area
-  const panelHtml = PANELS[App.tab]();
-  const container = App.mobile ? document.querySelector(".main-mobile-inner")
-                               : document.querySelector(".main-inner");
+  var panelHtml = PANELS[App.tab]();
+  var container = App.mobile ? document.querySelector(".main-mobile-inner") : document.querySelector(".main-inner");
   if (container) {
     container.innerHTML = panelHtml;
     bindEvents();
     if (key) {
-      const restored = document.querySelector(`input[data-key="${key}"]`);
+      var restored = document.querySelector('input[data-key="' + key + '"]');
       if (restored) {
         restored.focus();
-        if (caret != null) { try { restored.setSelectionRange(caret, caret); } catch(e){} }
+        if (caret != null) { try { restored.setSelectionRange(caret, caret); } catch (e) {} }
       }
     }
   }
 }
 
-window.addEventListener("resize", () => {
-  const wasMobile = App.mobile;
+window.addEventListener("resize", function() {
+  var wasMobile = App.mobile;
   App.mobile = window.innerWidth < 768;
   if (wasMobile !== App.mobile) render();
 });
 
-render();
-</script>
-</body>
-</html>
-+netHr.toFixed(2),68)}px;color:${netColor};word-break:break-all">${netHr.toFixed(2)}</div>
-      <div style="margin-top:8px;font-size:14px;color:${shortfall>0?C.rust:C.tealSoft}">${shortfall>0?`$${shortfall.toFixed(2)}/hr below $30 target`:"\u2713 Hitting the $30 target"}</div>
-    </div>
-
-    <div class="grid2" style="margin-bottom:16px">${grid}</div>
-
-    <div class="card" style="border-color:${C.amber}44">
-      <div class="eyebrow" style="margin-bottom:14px">What You Need to Hit $30</div>${needed}
-    </div>`;
-}
-
-/* ── RENDER ── */
-const PANELS = [Overview, OrderChecker, Schedule, Expenses, Calculator];
-
-function render() {
-  App.mobile = window.innerWidth < 768;
-  const panelHtml = PANELS[App.tab]();
-  const root = $("root");
-
-  if (App.mobile) {
-    root.innerHTML = `
-      <div class="app">
-        <div class="topbar">
-          <div style="font-family:${FD};font-size:22px;font-weight:800;color:${C.amber}">Deliver30</div>
-          <div style="font-size:10px;color:${C.sand};margin-left:10px;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px">$30/hr System</div>
-        </div>
-        <div class="main-mobile"><div class="main-mobile-inner">${panelHtml}</div></div>
-        <div class="tabbar">
-          ${NAV.map(n=>`<button class="tab-btn ${App.tab===n.id?"active":""}" data-tab="${n.id}">
-            <span class="ic">${n.icon}</span>
-            <span class="lbl">${n.label}</span>
-            ${App.tab===n.id?'<div class="tab-underline"></div>':""}
-          </button>`).join("")}
-        </div>
-      </div>`;
-  } else {
-    root.innerHTML = `
-      <div class="app">
-        <div class="sidebar">
-          <div class="sidebar-brand">
-            <div style="font-family:${FD};font-size:26px;font-weight:800;color:${C.amber}">Deliver30</div>
-            <div style="font-size:11px;color:${C.sand};letter-spacing:0.1em;text-transform:uppercase;margin-top:2px">$30/hr System</div>
-          </div>
-          <nav class="sidebar-nav">
-            ${NAV.map(n=>`<button class="nav-btn ${App.tab===n.id?"active":""}" data-tab="${n.id}">
-              <span class="ic">${n.icon}</span>${n.label}
-            </button>`).join("")}
-          </nav>
-          <div class="sidebar-foot">
-            <div style="font-size:12px;color:${C.muted};line-height:1.6;font-style:italic">"Treat delivery like a logistics business, not a side gig."</div>
-          </div>
-        </div>
-        <div class="main-desktop"><div class="main-inner">${panelHtml}</div></div>
-      </div>`;
-  }
-
-  bindEvents();
-}
-
-function bindEvents() {
-  // nav (desktop + mobile)
-  document.querySelectorAll("[data-tab]").forEach(btn=>{
-    btn.addEventListener("click",()=>{ App.tab = parseInt(btn.dataset.tab,10); render(); });
-  });
-
-  // number inputs — update store live without re-render (preserve focus)
-  document.querySelectorAll("input[data-key]").forEach(inp=>{
-    inp.addEventListener("input",()=>{
-      setByKey(inp.dataset.key, inp.value);
-      saveState();
-      liveUpdate();
-    });
-  });
-
-  // toggles
-  document.querySelectorAll("[data-toggle]").forEach(btn=>{
-    btn.addEventListener("click",()=>{
-      const key = btn.dataset.toggle;
-      const boolVal = btn.dataset.val === "true";
-      if (key === "oc.mode") {
-        // mode is a string, not a boolean
-        App.oc.mode = boolVal ? "manual" : "photo";
-        App.oc.scanError = null;
-      } else {
-        setByKey(key, boolVal);
-        // clear order result when switching gas/EV
-        if (key === "oc.isEV") App.oc.result = null;
-      }
-      saveState();
-      render();
-    });
-  });
-
-  // tip dots
-  document.querySelectorAll("[data-tip]").forEach(d=>{
-    d.addEventListener("click",()=>{ App.ov.tipIdx = parseInt(d.dataset.tip,10); render(); });
-  });
-
-  // day buttons
-  document.querySelectorAll("[data-day]").forEach(b=>{
-    b.addEventListener("click",()=>{
-      const d = b.dataset.day;
-      App.sc.days = App.sc.days.includes(d) ? App.sc.days.filter(x=>x!==d) : [...App.sc.days, d];
-      saveState();
-      render();
-    });
-  });
-
-  // analyze button
-  const ab = $("analyzeBtn");
-  if (ab) ab.addEventListener("click",()=>{
-    const o = App.oc;
-    App.oc.result = analyzeValues(num(o.pay), num(o.miles,1), num(o.minutes), o.isEV);
-    render();
-  });
-
-  // scan file input
-  const si = $("scanInput");
-  if (si) si.addEventListener("change",(e)=>{
-    const file = e.target.files && e.target.files[0];
-    if (file) handleScan(file);
-  });
-
-  // mode buttons (photo / manual) — both the toggle and the fallback link
-  document.querySelectorAll("[data-mode]").forEach(b=>{
-    b.addEventListener("click",()=>{
-      App.oc.mode = b.dataset.mode;
-      App.oc.scanError = null;
-      render();
-    });
-  });
-}
-
-/* re-render the live-calculated sections without losing input focus.
-   Simplest robust approach: re-render whole panel but restore focus + caret. */
-function liveUpdate() {
-  const active = document.activeElement;
-  const key = active && active.dataset ? active.dataset.key : null;
-  const caret = active && active.selectionStart != null ? active.selectionStart : null;
-
-  // Re-render only the panel content area
-  const panelHtml = PANELS[App.tab]();
-  const container = App.mobile ? document.querySelector(".main-mobile-inner")
-                               : document.querySelector(".main-inner");
-  if (container) {
-    container.innerHTML = panelHtml;
-    bindEvents();
-    if (key) {
-      const restored = document.querySelector(`input[data-key="${key}"]`);
-      if (restored) {
-        restored.focus();
-        if (caret != null) { try { restored.setSelectionRange(caret, caret); } catch(e){} }
-      }
-    }
-  }
-}
-
-window.addEventListener("resize", () => {
-  const wasMobile = App.mobile;
-  App.mobile = window.innerWidth < 768;
-  if (wasMobile !== App.mobile) render();
-});
-
+loadState();
 render();
 </script>
 </body>
