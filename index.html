@@ -8,179 +8,70 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg:        #0e0c0a;
-    --surface:   #151210;
-    --card:      #1a1714;
-    --border:    #2a2520;
-    --amber:     #e8a04a;
-    --amberSoft: #c47f2e;
-    --amberDim:  #7a4e1a;
-    --cream:     #f0e6d3;
-    --creamDim:  #b8a898;
-    --sand:      #8a7a68;
-    --rust:      #c4614a;
-    --rustSoft:  #e07a62;
-    --teal:      #4a8c8a;
-    --tealSoft:  #62aaa8;
-    --text:      #ede4d8;
-    --muted:     #7a6e62;
-    --fd: 'Playfair Display', Georgia, serif;
-    --fb: 'DM Sans', 'Helvetica Neue', sans-serif;
-    --fm: 'DM Mono', 'Courier New', monospace;
+    --bg:#0e0c0a; --surface:#151210; --card:#1a1714; --border:#2a2520;
+    --amber:#e8a04a; --amberSoft:#c47f2e; --amberDim:#7a4e1a;
+    --cream:#f0e6d3; --creamDim:#b8a898; --sand:#8a7a68;
+    --rust:#c4614a; --rustSoft:#e07a62; --teal:#4a8c8a; --tealSoft:#62aaa8;
+    --text:#ede4d8; --muted:#7a6e62;
+    --fd:'Playfair Display', Georgia, serif;
+    --fb:'DM Sans', 'Helvetica Neue', sans-serif;
+    --fm:'DM Mono', 'Courier New', monospace;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html, body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--fb);
-    -webkit-font-smoothing: antialiased;
-  }
-
-  input[type=number]::-webkit-inner-spin-button,
-  input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none; margin: 0;
-  }
+  html, body { background: var(--bg); color: var(--text); font-family: var(--fb); -webkit-font-smoothing: antialiased; }
+  input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   input[type=number] { -moz-appearance: textfield; }
-
   button { font-family: var(--fb); -webkit-tap-highlight-color: transparent; }
-
   .app { min-height: 100vh; }
-
-  .sidebar {
-    position: fixed; top: 0; left: 0; bottom: 0; width: 220px;
-    background: var(--surface); border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; z-index: 100;
-  }
+  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 220px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 100; }
   .sidebar-brand { padding: 28px 24px 24px; border-bottom: 1px solid var(--border); }
-  .sidebar-nav { flex: 1; padding: 16px 12px; }
+  .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
   .sidebar-foot { padding: 20px 24px; border-top: 1px solid var(--border); }
   .main-desktop { margin-left: 220px; min-height: 100vh; }
   .main-inner { max-width: 1100px; margin: 0 auto; padding: 48px 40px; }
-
-  .nav-btn {
-    width: 100%; display: flex; align-items: center; gap: 12px;
-    padding: 11px 14px; border-radius: 10px; border: none; cursor: pointer;
-    background: transparent; color: var(--muted);
-    font-size: 14px; font-weight: 400; text-align: left; margin-bottom: 4px;
-    border-left: 3px solid transparent; transition: all 0.15s;
-  }
+  .nav-btn { width: 100%; display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; border: none; cursor: pointer; background: transparent; color: var(--muted); font-size: 14px; font-weight: 400; text-align: left; margin-bottom: 4px; border-left: 3px solid transparent; transition: all 0.15s; }
   .nav-btn .ic { font-size: 16px; }
-  .nav-btn.active {
-    background: rgba(232,160,74,0.094); color: var(--amber);
-    font-weight: 600; border-left: 3px solid var(--amber);
-  }
-
-  .topbar {
-    position: fixed; top: 0; left: 0; right: 0; height: 54px;
-    background: rgba(21,18,16,0.94); backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; padding: 0 20px; z-index: 100;
-  }
+  .nav-btn.active { background: rgba(232,160,74,0.094); color: var(--amber); font-weight: 600; border-left: 3px solid var(--amber); }
+  .topbar { position: fixed; top: 0; left: 0; right: 0; height: 54px; background: rgba(21,18,16,0.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; z-index: 100; }
   .main-mobile { padding-top: 54px; padding-bottom: 80px; }
   .main-mobile-inner { padding: 24px 16px; }
-  .tabbar {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: rgba(21,18,16,0.97); backdrop-filter: blur(16px);
-    border-top: 1px solid var(--border); display: flex; z-index: 100;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  .tab-btn {
-    flex: 1; display: flex; flex-direction: column; align-items: center;
-    padding: 10px 4px; border: none; background: transparent;
-    color: var(--muted); cursor: pointer; transition: color 0.15s;
-  }
-  .tab-btn .ic { font-size: 20px; margin-bottom: 3px; }
-  .tab-btn .lbl { font-size: 10px; font-weight: 400; letter-spacing: 0.03em; }
+  .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(21,18,16,0.97); backdrop-filter: blur(16px); border-top: 1px solid var(--border); display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .tab-btn { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 2px; border: none; background: transparent; color: var(--muted); cursor: pointer; transition: color 0.15s; }
+  .tab-btn .ic { font-size: 19px; margin-bottom: 3px; }
+  .tab-btn .lbl { font-size: 9px; font-weight: 400; letter-spacing: 0.02em; }
   .tab-btn.active { color: var(--amber); }
   .tab-btn.active .lbl { font-weight: 700; }
-  .tab-underline { width: 20px; height: 2px; background: var(--amber); border-radius: 1px; margin-top: 4px; }
-
-  .card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 20px;
-  }
+  .tab-underline { width: 18px; height: 2px; background: var(--amber); border-radius: 1px; margin-top: 4px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
   .card.glow { border-color: var(--amberDim); box-shadow: 0 0 40px rgba(232,160,74,0.078); }
-
-  .eyebrow {
-    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
-    color: var(--sand); font-weight: 600; margin-bottom: 6px;
-  }
+  .eyebrow { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sand); font-weight: 600; margin-bottom: 6px; }
   .bignum { font-family: var(--fd); font-weight: 700; line-height: 1; color: var(--amber); }
-
   .page-eyebrow { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sand); font-weight: 600; margin-bottom: 10px; }
   .page-title { font-family: var(--fd); font-size: 32px; font-weight: 700; color: var(--cream); line-height: 1.15; letter-spacing: -0.3px; }
   .page-sub { color: var(--muted); font-size: 14px; margin-top: 8px; line-height: 1.6; }
   .page-head { margin-bottom: 28px; }
-
-  .ninput-shell {
-    display: flex; align-items: center; background: var(--surface);
-    border: 1px solid var(--border); border-radius: 12px;
-    padding: 14px 16px; transition: border-color 0.15s;
-  }
+  .ninput-shell { display: flex; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; transition: border-color 0.15s; }
   .ninput-shell:focus-within { border-color: var(--amber); background: #1e1b17; }
   .ninput-prefix { color: var(--sand); font-family: var(--fm); font-size: 18px; margin-right: 4px; }
-  .ninput-shell input {
-    background: transparent; border: none; outline: none; color: var(--cream);
-    font-size: 22px; font-family: var(--fm); font-weight: 500; width: 100%; min-width: 0;
-    -webkit-appearance: none;
-  }
-
+  .ninput-shell input { background: transparent; border: none; outline: none; color: var(--cream); font-size: 22px; font-family: var(--fm); font-weight: 500; width: 100%; min-width: 0; -webkit-appearance: none; }
   .divider { height: 1px; background: var(--border); }
-
-  .pill {
-    display: inline-block; padding: 3px 10px; border-radius: 999px;
-    font-size: 11px; font-weight: 600;
-  }
-
-  .toggle {
-    display: flex; background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px; padding: 4px; margin-bottom: 20px;
-  }
-  .toggle-opt {
-    flex: 1; padding: 10px 12px; border-radius: 9px; border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    background: transparent; color: var(--muted);
-    font-size: 13px; font-weight: 700; transition: all 0.2s;
-  }
+  .pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .toggle { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 4px; margin-bottom: 20px; }
+  .toggle-opt { flex: 1; padding: 10px 12px; border-radius: 9px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; background: transparent; color: var(--muted); font-size: 13px; font-weight: 700; transition: all 0.2s; }
   .toggle-opt .ic { font-size: 15px; }
   .toggle-opt.active { background: var(--amber); color: var(--bg); }
-
   .ratingbar { display: flex; gap: 3px; margin-top: 8px; }
   .ratingbar .seg { flex: 1; height: 4px; border-radius: 2px; background: var(--border); }
-
-  .primary-btn {
-    width: 100%; padding: 16px 24px;
-    background: linear-gradient(135deg, var(--amberDim), var(--amber));
-    border: none; border-radius: 14px; color: #0e0c0a;
-    font-size: 15px; font-weight: 700; cursor: pointer;
-    letter-spacing: 0.06em; text-transform: uppercase;
-  }
-
+  .primary-btn { width: 100%; padding: 16px 24px; background: linear-gradient(135deg, var(--amberDim), var(--amber)); border: none; border-radius: 14px; color: #0e0c0a; font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .col { display: flex; flex-direction: column; gap: 14px; }
-
   .row-between { display: flex; justify-content: space-between; align-items: center; }
-
   .checklist { display: flex; flex-direction: column; gap: 1px; background: var(--border); border-radius: 12px; overflow: hidden; }
   .checklist-item { background: var(--card); padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; }
   .checklist-box { width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--amberDim); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
   .checklist-box .dot { width: 8px; height: 8px; border-radius: 2px; background: var(--amberDim); }
-
-  .day-btn {
-    flex: 1 1 auto; padding: 11px 4px; border-radius: 10px;
-    border: 1px solid var(--border); background: transparent; color: var(--muted);
-    font-size: 12px; cursor: pointer; font-weight: 600; transition: all 0.15s;
-  }
+  .day-btn { flex: 1 1 auto; padding: 11px 4px; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; font-weight: 600; transition: all 0.15s; }
   .day-btn.active { border-color: var(--amber); background: rgba(232,160,74,0.094); color: var(--amber); }
-
-  .desktop-only { display: block; }
-  .mobile-only  { display: none; }
-  @media (max-width: 767px) {
-    .desktop-only { display: none; }
-    .mobile-only  { display: block; }
-  }
 </style>
 </head>
 <body>
@@ -199,9 +90,10 @@ var FM = "var(--fm)", FD = "var(--fd)", FB = "var(--fb)";
 var NAV = [
   { id:0, label:"Overview",  icon:"\u25C8" },
   { id:1, label:"Orders",    icon:"\u2299" },
-  { id:2, label:"Schedule",  icon:"\u25F7" },
-  { id:3, label:"Expenses",  icon:"\u25CE" },
-  { id:4, label:"Calc",      icon:"\u229E" }
+  { id:2, label:"Totals",    icon:"\u03A3" },
+  { id:3, label:"Schedule",  icon:"\u25F7" },
+  { id:4, label:"Expenses",  icon:"\u25CE" },
+  { id:5, label:"Calc",      icon:"\u229E" }
 ];
 
 var TIPS = [
@@ -217,21 +109,20 @@ var TIPS = [
 var App = {
   tab: 0,
   mobile: window.innerWidth < 768,
-  ov: { gross:"", hours:"", miles:"", fuel:"", orders:"", tipIdx:0 },
+  ov: { gross:"", hours:"", miles:"", fuel:"", orders:"", tipIdx:0,
+        scanning:false, scanError:null, imgPreview:null, scanOk:false, scanWarn:null, justLogged:null },
   oc: { isEV:false, mode:"photo", pay:"", miles:"", minutes:"", result:null,
         scanning:false, scanError:null, imgPreview:null },
   sc: { days:[] },
   ex: { isEV:false, mpg:"28", gasPrice:"3.50", kwhPer100:"30", elecPrice:"0.16",
-        fastChargePct:"20", fastChargePrice:"0.42", wkMiles:"300", depRate:"0.07" },
+        fastChargePct:"20", fastChargePrice:"0.42", wkMiles:"300" },
   cl: { isEV:false, dph:"3", base:"3.50", tip:"8.00", mpd:"4", peakPay:"0",
-        gasP:"3.50", mpg:"28", kwhPer100:"30", elecPrice:"0.16", depM:"0.07" }
+        gasP:"3.50", mpg:"28", kwhPer100:"30", elecPrice:"0.16" }
 };
 
 function $(id) { return document.getElementById(id); }
 function num(v, d) { d = d || 0; var n = parseFloat(v); return isNaN(n) ? d : Math.max(0, n); }
-function esc(s) {
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
+function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function fitFont(str, base) {
   var len = String(str).length;
   if (len <= 8)  return base;
@@ -239,22 +130,44 @@ function fitFont(str, base) {
   return Math.round(base * 0.5);
 }
 
-var STORAGE_KEY = "deliver30_v1";
+function makeICS(title, sh, sm, eh, em, daysOfWeek) {
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  var now = new Date();
+  var dt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), sh, sm);
+  if (dt < now) dt.setDate(dt.getDate() + 1);
+  var endDt = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), eh, em);
+  if (endDt <= dt) endDt.setDate(endDt.getDate() + 1);
+  function fmt(d) { return d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + "T" + pad(d.getHours()) + pad(d.getMinutes()) + "00"; }
+  var uid = "deliver30-" + Date.now() + "-" + Math.floor(Math.random()*9999) + "@deliver30";
+  var lines = [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Deliver30//EN",
+    "BEGIN:VEVENT", "UID:" + uid, "DTSTART:" + fmt(dt), "DTEND:" + fmt(endDt),
+    "SUMMARY:" + title, "DESCRIPTION:Deliver30 peak earning window",
+    "BEGIN:VALARM", "TRIGGER:-PT15M", "ACTION:DISPLAY", "DESCRIPTION:" + title + " starts in 15 min", "END:VALARM"
+  ];
+  if (daysOfWeek && daysOfWeek.length) lines.push("RRULE:FREQ=WEEKLY;BYDAY=" + daysOfWeek.join(","));
+  lines.push("END:VEVENT", "END:VCALENDAR");
+  return "data:text/calendar;charset=utf-8," + encodeURIComponent(lines.join("\r\n"));
+}
+function downloadICS(dataUrl, filename) {
+  var a = document.createElement("a");
+  a.href = dataUrl; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
 
+var STORAGE_KEY = "deliver30_v1";
 function saveState() {
   try {
-    var snapshot = {
-      ov: { gross:App.ov.gross, hours:App.ov.hours, miles:App.ov.miles,
-            fuel:App.ov.fuel, orders:App.ov.orders },
+    var snap = {
+      ov: { gross:App.ov.gross, hours:App.ov.hours, miles:App.ov.miles, fuel:App.ov.fuel, orders:App.ov.orders },
       oc: { isEV:App.oc.isEV, mode:App.oc.mode },
       sc: { days:App.sc.days },
       ex: Object.assign({}, App.ex),
       cl: Object.assign({}, App.cl)
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
-  } catch (e) { /* storage full or blocked — fail silently */ }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
+  } catch (e) {}
 }
-
 function loadState() {
   try {
     var raw = localStorage.getItem(STORAGE_KEY);
@@ -265,52 +178,78 @@ function loadState() {
     if (s.sc && Array.isArray(s.sc.days)) App.sc.days = s.sc.days;
     if (s.ex) Object.assign(App.ex, s.ex);
     if (s.cl) Object.assign(App.cl, s.cl);
-  } catch (e) { /* corrupt data — ignore and start fresh */ }
+  } catch (e) {}
 }
-
 function getByKey(k) { var p = k.split("."); return App[p[0]][p[1]]; }
 function setByKey(k, v) { var p = k.split("."); App[p[0]][p[1]] = v; }
 
+var HISTORY_KEY = "deliver30_history_v1";
+function loadHistory() {
+  try { var raw = localStorage.getItem(HISTORY_KEY); if (!raw) return []; var a = JSON.parse(raw); return Array.isArray(a) ? a : []; }
+  catch (e) { return []; }
+}
+function saveHistory(arr) { try { localStorage.setItem(HISTORY_KEY, JSON.stringify(arr)); } catch (e) {} }
+function todayKey() {
+  var d = new Date();
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate());
+}
+function logShift() {
+  var o = App.ov;
+  var gross = num(o.gross), hours = num(o.hours), miles = num(o.miles), fuel = num(o.fuel), orders = num(o.orders);
+  if (!gross && !hours) return false;
+  var hist = loadHistory();
+  var key = todayKey();
+  var entry = { date:key, gross:gross, hours:hours, miles:miles, fuel:fuel, orders:orders, ts:Date.now() };
+  var replaced = false;
+  for (var i = 0; i < hist.length; i++) { if (hist[i].date === key) { hist[i] = entry; replaced = true; break; } }
+  if (!replaced) hist.push(entry);
+  saveHistory(hist);
+  App.ov.justLogged = replaced ? "updated" : "added";
+  return true;
+}
+function deleteShift(ts) {
+  var hist = loadHistory().filter(function(e) { return e.ts !== ts; });
+  saveHistory(hist);
+}
+function computeTotals() {
+  var hist = loadHistory();
+  var now = new Date();
+  var y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
+  var dow = now.getDay();
+  var daysSinceMon = (dow + 6) % 7;
+  var weekStart = new Date(y, m, d - daysSinceMon);
+  var monthStart = new Date(y, m, 1);
+  var yearStart = new Date(y, 0, 1);
+  function blank() { return { gross:0, hours:0, miles:0, fuel:0, orders:0, days:0 }; }
+  var wk = blank(), mo = blank(), yr = blank();
+  function add(acc, e) { acc.gross += e.gross; acc.hours += e.hours; acc.miles += e.miles; acc.fuel += e.fuel; acc.orders += e.orders; acc.days += 1; }
+  for (var i = 0; i < hist.length; i++) {
+    var e = hist[i];
+    var parts = e.date.split("-");
+    var ed = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10));
+    if (ed >= yearStart)  add(yr, e);
+    if (ed >= monthStart) add(mo, e);
+    if (ed >= weekStart)  add(wk, e);
+  }
+  return { week:wk, month:mo, year:yr, history:hist };
+}
+
 function pageHead(eyebrow, title, sub) {
-  return '<div class="page-head">' +
-    '<div class="page-eyebrow">' + esc(eyebrow) + '</div>' +
-    '<h1 class="page-title">' + esc(title) + '</h1>' +
-    (sub ? '<p class="page-sub">' + esc(sub) + '</p>' : '') +
-  '</div>';
+  return '<div class="page-head"><div class="page-eyebrow">' + esc(eyebrow) + '</div><h1 class="page-title">' + esc(title) + '</h1>' + (sub ? '<p class="page-sub">' + esc(sub) + '</p>' : '') + '</div>';
 }
-
 function ninput(o) {
-  return '<div>' +
-    '<div class="eyebrow">' + esc(o.label) + '</div>' +
-    '<div class="ninput-shell">' +
-      (o.prefix ? '<span class="ninput-prefix">' + o.prefix + '</span>' : '') +
-      '<input type="number" inputmode="decimal" data-key="' + o.key + '" placeholder="' +
-        (o.placeholder || "0") + '" value="' + esc(getByKey(o.key)) + '" />' +
-    '</div>' +
-  '</div>';
+  return '<div><div class="eyebrow">' + esc(o.label) + '</div><div class="ninput-shell">' + (o.prefix ? '<span class="ninput-prefix">' + o.prefix + '</span>' : '') + '<input type="number" inputmode="decimal" data-key="' + o.key + '" placeholder="' + (o.placeholder || "0") + '" value="' + esc(getByKey(o.key)) + '" /></div></div>';
 }
-
 function toggle(o) {
-  return '<div class="toggle">' +
-    '<button class="toggle-opt ' + (!o.value ? "active" : "") + '" data-toggle="' + o.key + '" data-val="false">' +
-      '<span class="ic">' + o.leftIcon + '</span>' + esc(o.leftLabel) +
-    '</button>' +
-    '<button class="toggle-opt ' + (o.value ? "active" : "") + '" data-toggle="' + o.key + '" data-val="true">' +
-      '<span class="ic">' + o.rightIcon + '</span>' + esc(o.rightLabel) +
-    '</button>' +
-  '</div>';
+  return '<div class="toggle"><button class="toggle-opt ' + (!o.value ? "active" : "") + '" data-toggle="' + o.key + '" data-val="false"><span class="ic">' + o.leftIcon + '</span>' + esc(o.leftLabel) + '</button><button class="toggle-opt ' + (o.value ? "active" : "") + '" data-toggle="' + o.key + '" data-val="true"><span class="ic">' + o.rightIcon + '</span>' + esc(o.rightLabel) + '</button></div>';
 }
-
 function pill(text, color) {
   return '<span class="pill" style="color:' + color + ';background:' + color + '18;border:1px solid ' + color + '33">' + esc(text) + '</span>';
 }
-
 function ratingBar(value, color, max) {
-  max = max || 10;
-  var segs = "";
-  for (var i = 0; i < max; i++) {
-    segs += '<div class="seg" style="' + (i < value ? "background:" + color : "") + '"></div>';
-  }
+  max = max || 10; var segs = "";
+  for (var i = 0; i < max; i++) segs += '<div class="seg" style="' + (i < value ? "background:" + color : "") + '"></div>';
   return '<div class="ratingbar">' + segs + '</div>';
 }
 
@@ -318,66 +257,73 @@ function ratingBar(value, color, max) {
 function Overview() {
   var o = App.ov;
   var g = num(o.gross), h = num(o.hours), m = num(o.miles), f = num(o.fuel), ord = num(o.orders);
-  var net = g - f, netHr = h > 0 ? net / h : 0, dpm = m > 0 ? g / m : 0,
-      apo = ord > 0 ? g / ord : 0, oph = h > 0 ? ord / h : 0, tax = g * 0.20;
+  var net = g - f, netHr = h > 0 ? net / h : 0, dpm = m > 0 ? g / m : 0, apo = ord > 0 ? g / ord : 0, oph = h > 0 ? ord / h : 0;
   var tierColor = netHr >= 30 ? C.tealSoft : netHr >= 23 ? C.amber : C.rustSoft;
   var tierLabel = netHr >= 30 ? "Advanced" : netHr >= 23 ? "Intermediate" : "Beginner";
   var pct = Math.max(0, Math.min((netHr / 40) * 100, 100));
   var mob = App.mobile;
   var heroStr = "$" + netHr.toFixed(2);
   var heroSize = fitFont(heroStr, mob ? 56 : 72);
+  var hasMiles = m > 0;
 
   var statData = [
-    { label:"$/Mile",      value:"$" + dpm.toFixed(2), ok:dpm >= 2,   note:"$2.00 min" },
-    { label:"Avg/Order",   value:"$" + apo.toFixed(2), ok:apo >= 7,   note:"$7.00 min" },
-    { label:"Orders/Hr",   value:oph.toFixed(1),        ok:oph >= 2.5, note:"2.5 target" },
-    { label:"Tax Reserve", value:"$" + tax.toFixed(2),  ok:true,       note:"20% of gross", color:C.amber }
+    { label:"$/Mile",    value:hasMiles ? "$" + dpm.toFixed(2) : "\u2014", ok:dpm >= 2, note:hasMiles ? "$2.00 min" : "add miles", dim:!hasMiles },
+    { label:"Avg/Order", value:"$" + apo.toFixed(2), ok:apo >= 7,   note:"$7.00 min" },
+    { label:"Orders/Hr", value:oph.toFixed(1),        ok:oph >= 2.5, note:"2.5 target" }
   ];
   var stats = statData.map(function(s) {
-    return '<div class="card">' +
-      '<div class="eyebrow">' + s.label + '</div>' +
-      '<div class="bignum" style="font-size:28px;color:' + (s.color || (s.ok ? C.tealSoft : C.rustSoft)) + '">' + s.value + '</div>' +
-      '<div style="margin-top:6px;font-size:12px;color:' + (s.ok ? C.tealSoft : C.rust) + '">' + (s.ok ? "\u2713" : "\u2191") + ' ' + s.note + '</div>' +
-    '</div>';
+    return '<div class="card"><div class="eyebrow">' + s.label + '</div><div class="bignum" style="font-size:28px;color:' + (s.dim ? C.muted : (s.ok ? C.tealSoft : C.rustSoft)) + '">' + s.value + '</div><div style="margin-top:6px;font-size:12px;color:' + (s.dim ? C.muted : (s.ok ? C.tealSoft : C.rust)) + '">' + (s.dim ? "" : (s.ok ? "\u2713" : "\u2191") + " ") + s.note + '</div></div>';
   }).join("");
 
   var dots = TIPS.map(function(_, i) {
     return '<div data-tip="' + i + '" style="width:' + (i === o.tipIdx ? 18 : 6) + 'px;height:6px;border-radius:3px;background:' + (i === o.tipIdx ? C.amber : C.border) + ';cursor:pointer;transition:all 0.3s"></div>';
   }).join("");
 
-  return pageHead("Shift Tracker", "Today's Overview", "Log your shift to see your real net hourly rate after fuel.") +
+  var ovPreview = o.imgPreview ? '<div style="margin-bottom:16px;border-radius:12px;overflow:hidden;border:1px solid ' + C.border + '"><img src="' + o.imgPreview + '" alt="Earnings screenshot" style="width:100%;display:block;max-height:200px;object-fit:cover" /></div>' : "";
+  var ovScanningNote = o.scanning ? '<div style="margin-top:12px;font-size:13px;color:' + C.muted + ';text-align:center">Reading your earnings total…</div>' : "";
+  var ovError = o.scanError ? '<div style="margin-top:14px;font-size:13px;color:' + C.rustSoft + '">' + esc(o.scanError) + '</div>' : "";
+  var ovOk = (!o.scanning && !o.scanError && o.scanOk) ?
+    (o.scanWarn
+      ? '<div style="margin-top:12px;padding:12px 14px;background:' + C.amber + '14;border:1px solid ' + C.amber + '44;border-radius:10px;font-size:13px;color:' + C.amber + ';line-height:1.5">\u26A0 ' + esc(o.scanWarn) + '</div>'
+      : '<div style="margin-top:12px;padding:12px 14px;background:' + C.tealSoft + '12;border:1px solid ' + C.tealSoft + '33;border-radius:10px;font-size:13px;color:' + C.tealSoft + ';line-height:1.5">\u2713 Filled in below \u2014 <span style="color:' + C.cream + '">double-check the numbers match your screenshot</span>, then add your miles for the after-fuel view.</div>')
+    : "";
+
+  var scanCard =
+    '<div class="card" style="margin-bottom:16px">' +
+      '<div class="eyebrow" style="margin-bottom:6px">Quick Fill from Screenshot</div>' +
+      '<div style="font-size:13px;color:' + C.muted + ';margin-bottom:14px;line-height:1.5">Snap your end-of-day earnings summary from DoorDash, Uber Eats, etc. We\'ll fill in your total and hours. Miles stay optional \u2014 add them for your true after-fuel rate.</div>' +
+      ovPreview +
+      '<label style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:18px 24px;border-radius:14px;border:1.5px dashed ' + C.amberDim + ';background:' + C.amber + '0c;color:' + (o.scanning ? C.muted : C.amber) + ';font-size:14px;font-weight:700;cursor:' + (o.scanning ? "not-allowed" : "pointer") + ';letter-spacing:0.04em;text-transform:uppercase;box-sizing:border-box">' +
+        '<span style="font-size:18px">' + (o.scanning ? "\u23F3" : "\uD83D\uDCF7") + '</span>' +
+        (o.scanning ? "Reading\u2026" : (o.imgPreview ? "Scan Another" : "Upload Earnings Screenshot")) +
+        '<input type="file" accept="image/*" capture="environment" id="ovScanInput" style="display:none" ' + (o.scanning ? "disabled" : "") + ' />' +
+      '</label>' +
+      ovScanningNote + ovError + ovOk +
+    '</div>';
+
+  var loggedNote = o.justLogged ? '<div style="margin-top:10px;font-size:13px;color:' + C.tealSoft + ';text-align:center">\u2713 Shift ' + (o.justLogged === "updated" ? "updated" : "logged") + ' \u2014 view it on the Totals tab</div>' : "";
+  var logBtn = '<button id="logShiftBtn" style="width:100%;margin-bottom:16px;padding:14px 16px;border-radius:12px;border:1px solid ' + C.tealSoft + '55;background:' + C.tealSoft + '12;color:' + C.tealSoft + ';font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.05em;text-transform:uppercase">+ Log This Shift to Totals</button>' + loggedNote;
+
+  return pageHead("Shift Tracker", "Today's Overview", "Upload your earnings screenshot or enter your totals to see your real net hourly rate.") +
+    scanCard +
     '<div style="display:grid;grid-template-columns:' + (mob ? "1fr 1fr" : "repeat(5,1fr)") + ';gap:12px;margin-bottom:20px">' +
       ninput({key:"ov.gross", label:"Gross Earned", prefix:"$", placeholder:"0.00"}) +
       ninput({key:"ov.hours", label:"Hours Online", placeholder:"0.0"}) +
-      ninput({key:"ov.miles", label:"Miles Driven", placeholder:"0"}) +
+      ninput({key:"ov.miles", label:"Miles (optional)", placeholder:"\u2014 add miles"}) +
       ninput({key:"ov.fuel", label:"Fuel Cost", prefix:"$", placeholder:"0.00"}) +
       '<div style="' + (mob ? "grid-column:span 2" : "") + '">' + ninput({key:"ov.orders", label:"Orders Done", placeholder:"0"}) + '</div>' +
     '</div>' +
-
+    logBtn +
     '<div class="card glow" style="margin-bottom:16px;position:relative;overflow:hidden">' +
       '<div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle, ' + C.amber + '10 0%, transparent 70%);pointer-events:none"></div>' +
-      '<div class="eyebrow">Net Hourly Rate</div>' +
+      '<div class="eyebrow">' + (hasMiles ? "Net Hourly (after fuel)" : "Gross Hourly Rate") + '</div>' +
       '<div class="bignum" style="font-size:' + heroSize + 'px;color:' + tierColor + ';word-break:break-all">' + heroStr + '</div>' +
-      '<div style="margin-top:16px;margin-bottom:8px" class="row-between">' +
-        '<span style="font-size:12px;color:' + C.muted + '">$0</span>' +
-        pill(tierLabel, tierColor) +
-        '<span style="font-size:12px;color:' + C.muted + '">$40/hr</span>' +
-      '</div>' +
-      '<div style="height:6px;background:' + C.surface + ';border-radius:3px;overflow:hidden">' +
-        '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg, ' + C.amberDim + ', ' + tierColor + ');border-radius:3px;transition:width 0.6s ease"></div>' +
-      '</div>' +
-      '<div style="margin-top:14px;font-size:13px;color:' + C.muted + '">' +
-        'Net: <span style="color:' + C.cream + '">$' + net.toFixed(2) + '</span> \u00B7 Fuel deducted: <span style="color:' + C.cream + '">$' + f.toFixed(2) + '</span>' +
-      '</div>' +
+      '<div style="margin-top:16px;margin-bottom:8px" class="row-between"><span style="font-size:12px;color:' + C.muted + '">$0</span>' + pill(tierLabel, tierColor) + '<span style="font-size:12px;color:' + C.muted + '">$40/hr</span></div>' +
+      '<div style="height:6px;background:' + C.surface + ';border-radius:3px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg, ' + C.amberDim + ', ' + tierColor + ');border-radius:3px;transition:width 0.6s ease"></div></div>' +
+      '<div style="margin-top:14px;font-size:13px;color:' + C.muted + '">' + (hasMiles ? 'Net: <span style="color:' + C.cream + '">$' + net.toFixed(2) + '</span> \u00B7 Fuel deducted: <span style="color:' + C.cream + '">$' + f.toFixed(2) + '</span>' : 'Add miles and fuel above to see your true after-fuel rate') + '</div>' +
     '</div>' +
-
-    '<div style="display:grid;grid-template-columns:' + (mob ? "1fr 1fr" : "repeat(4,1fr)") + ';gap:12px;margin-bottom:16px">' + stats + '</div>' +
-
-    '<div class="card">' +
-      '<div class="eyebrow">Driver Insight</div>' +
-      '<div style="font-size:15px;color:' + C.creamDim + ';font-family:' + FD + ';font-style:italic;line-height:1.7">"' + esc(TIPS[o.tipIdx]) + '"</div>' +
-      '<div style="margin-top:14px;display:flex;gap:6px">' + dots + '</div>' +
-    '</div>';
+    '<div style="display:grid;grid-template-columns:' + (mob ? "1fr 1fr" : "repeat(3,1fr)") + ';gap:12px;margin-bottom:16px">' + stats + '</div>' +
+    '<div class="card"><div class="eyebrow">Driver Insight</div><div style="font-size:15px;color:' + C.creamDim + ';font-family:' + FD + ';font-style:italic;line-height:1.7">"' + esc(TIPS[o.tipIdx]) + '"</div><div style="margin-top:14px;display:flex;gap:6px">' + dots + '</div></div>';
 }
 
 /* ── ORDER CHECKER ── */
@@ -389,18 +335,15 @@ function analyzeValues(p, m, mins, isEV) {
   if (dpm >= minDpm && p >= 7 && m <= 6) { verdict = "Accept"; color = C.tealSoft; }
   else if (dpm >= skipDpm)                { verdict = "Borderline"; color = C.amber; }
   else                                    { verdict = "Decline"; color = C.rustSoft; }
-
   if (dpm < minDpm)  reasons.push("Below the $" + minDpm.toFixed(2) + "/mile rule" + (isEV ? " (EV)" : ""));
   if (dpm < skipDpm) reasons.push("Under $" + skipDpm.toFixed(2) + "/mile \u2014 hard to justify");
   if (p < 7)         reasons.push("Payout under $7 threshold");
   if (m > 6)         reasons.push("Over 6 miles \u2014 hurts your orders per hour");
   if (hrlyRate !== null && hrlyRate < 30) reasons.push("Only ~$" + hrlyRate.toFixed(0) + "/hr at this pace \u2014 below $30 target");
-
   if (p >= 10 && m <= 5) positives.push("High-value, short distance \u2014 rare find");
   if (dpm >= minDpm)     positives.push("Meets the $" + minDpm.toFixed(2) + "/mile rule");
   if (hrlyRate !== null && hrlyRate >= 30) positives.push("~$" + hrlyRate.toFixed(0) + "/hr at this pace \u2014 hits your target");
   if (isEV && dpm >= skipDpm && dpm < minDpm) positives.push("EV running costs make this more viable than for gas vehicles");
-
   return { verdict:verdict, color:color, dpm:dpm, hrlyRate:hrlyRate, reasons:reasons, positives:positives };
 }
 
@@ -412,11 +355,7 @@ function resizeImage(file) {
       img.onload = function() {
         var maxDim = 1024;
         var w = img.width, h = img.height;
-        if (w > maxDim || h > maxDim) {
-          var scale = maxDim / Math.max(w, h);
-          w = Math.round(w * scale);
-          h = Math.round(h * scale);
-        }
+        if (w > maxDim || h > maxDim) { var scale = maxDim / Math.max(w, h); w = Math.round(w*scale); h = Math.round(h*scale); }
         var canvas = document.createElement("canvas");
         canvas.width = w; canvas.height = h;
         canvas.getContext("2d").drawImage(img, 0, 0, w, h);
@@ -432,19 +371,41 @@ function resizeImage(file) {
 
 var scanToken = 0;
 
-function attemptScan(base64) {
+/* Client-side scan rate limit. Caps scans per rolling hour per device to
+   stop someone dumping photos and running up API cost. This is a deterrent,
+   not airtight security (a determined user can clear storage) — the real
+   ceiling lives in the serverless function. */
+var SCAN_LIMIT_KEY = "deliver30_scan_log_v1";
+var SCAN_MAX_PER_HOUR = 20;
+
+function scanRateOk() {
+  try {
+    var now = Date.now();
+    var hourAgo = now - 3600000;
+    var log = JSON.parse(localStorage.getItem(SCAN_LIMIT_KEY) || "[]");
+    if (!Array.isArray(log)) log = [];
+    log = log.filter(function(ts) { return ts > hourAgo; }); // drop old entries
+    if (log.length >= SCAN_MAX_PER_HOUR) {
+      localStorage.setItem(SCAN_LIMIT_KEY, JSON.stringify(log));
+      return false;
+    }
+    log.push(now);
+    localStorage.setItem(SCAN_LIMIT_KEY, JSON.stringify(log));
+    return true;
+  } catch (e) {
+    return true; // if storage is blocked, don't hard-block the user
+  }
+}
+
+function attemptScan(base64, kind) {
   return fetch("/.netlify/functions/scan-order", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ image: base64, mediaType: "image/jpeg" })
+    body: JSON.stringify({ image: base64, mediaType: "image/jpeg", kind: kind || "offer" })
   }).then(function(resp) {
-    if (!resp.ok) {
-      return { ok:false, message:"Couldn't reach the scan service. Try again in a moment.", transient:true };
-    }
+    if (!resp.ok) return { ok:false, message:"Couldn't reach the scan service. Try again in a moment.", transient:true };
     return resp.json().then(function(parsed) {
-      if (parsed.error) {
-        return { ok:false, message:parsed.error, transient:!!parsed.transient };
-      }
+      if (parsed.error) return { ok:false, message:parsed.error, transient:!!parsed.transient };
       return { ok:true, data:parsed };
     });
   }).catch(function() {
@@ -452,51 +413,76 @@ function attemptScan(base64) {
   });
 }
 
-function handleScan(file) {
+function runScan(file, section, kind, onData) {
   if (!file) return;
-  if (App.oc.scanning) return;
+  var st = App[section];
+  if (st.scanning) return;
+
+  // Rate-limit check before doing any work or making any call.
+  if (!scanRateOk()) {
+    st.scanError = "You've hit the scan limit for this hour. You can still enter your numbers manually below.";
+    if (section === "ov") { st.scanOk = false; if (st.mode) st.mode = "manual"; }
+    if (section === "oc") st.mode = "manual";
+    render();
+    return;
+  }
+
   var myToken = ++scanToken;
-  App.oc.scanning = true;
-  App.oc.scanError = null;
-  App.oc.result = null;
+  st.scanning = true; st.scanError = null;
+  if (section === "oc") st.result = null;
+  if (section === "ov") st.scanOk = false;
   render();
 
   resizeImage(file).then(function(dataUrl) {
     if (myToken !== scanToken) return;
-    App.oc.imgPreview = dataUrl;
+    st.imgPreview = dataUrl;
     var base64 = dataUrl.split(",")[1];
-
-    return attemptScan(base64).then(function(res) {
+    return attemptScan(base64, kind).then(function(res) {
       if (myToken !== scanToken) return;
       if (!res.ok && res.transient) {
         return new Promise(function(r) { setTimeout(r, 2000); }).then(function() {
           if (myToken !== scanToken) return null;
-          return attemptScan(base64);
+          return attemptScan(base64, kind);
         });
       }
       return res;
     }).then(function(res) {
       if (myToken !== scanToken || !res) return;
       if (!res.ok) throw new Error(res.message);
-
-      var p = Number(res.data.pay) || 0;
-      var m = Number(res.data.miles) || 0;
-      var mins = Number(res.data.minutes) || 0;
-      if (!p && !m) throw new Error("Couldn't find payout or mileage \u2014 try a clearer screenshot.");
-
-      App.oc.pay     = p    ? String(p)    : "";
-      App.oc.miles   = m    ? String(m)    : "";
-      App.oc.minutes = mins ? String(mins) : "";
-      App.oc.result  = analyzeValues(p, m || 1, mins, App.oc.isEV);
+      onData(res.data);
     });
   }).catch(function(err) {
     if (myToken !== scanToken) return;
-    App.oc.scanError = (err && err.message) ? err.message : "Something went wrong reading that screenshot.";
+    st.scanError = (err && err.message) ? err.message : "Something went wrong reading that screenshot.";
   }).then(function() {
-    if (myToken === scanToken) {
-      App.oc.scanning = false;
-      render();
-    }
+    if (myToken === scanToken) { st.scanning = false; render(); }
+  });
+}
+
+function handleScan(file) {
+  runScan(file, "oc", "offer", function(data) {
+    var p = Number(data.pay) || 0;
+    var m = Number(data.miles) || 0;
+    var mins = Number(data.minutes) || 0;
+    if (!p && !m) throw new Error("Couldn't find payout or mileage \u2014 try a clearer screenshot.");
+    App.oc.pay = p ? String(p) : "";
+    App.oc.miles = m ? String(m) : "";
+    App.oc.minutes = mins ? String(mins) : "";
+    App.oc.result = analyzeValues(p, m || 1, mins, App.oc.isEV);
+  });
+}
+
+function handleOverviewScan(file) {
+  runScan(file, "ov", "summary", function(data) {
+    var gross = Number(data.gross) || 0;
+    var hours = Number(data.hours) || 0;
+    if (!gross) throw new Error("Couldn't find your earnings total \u2014 make sure the screenshot shows a daily or weekly total, not a single offer or your account balance.");
+    App.ov.gross = String(gross);
+    if (hours) App.ov.hours = String(hours);
+    var hr = hours > 0 ? gross / hours : 0;
+    App.ov.scanWarn = (hr > 150 || (hours > 0 && hr < 2)) ? "That works out to about $" + hr.toFixed(0) + "/hr, which looks off \u2014 the scan may have grabbed the wrong number. Please check it against your screenshot." : null;
+    App.ov.scanOk = true;
+    saveState();
   });
 }
 
@@ -504,7 +490,6 @@ function OrderChecker() {
   var o = App.oc;
   var mob = App.mobile;
   var minDpm = o.isEV ? 1.7 : 2.0, skipDpm = o.isEV ? 1.3 : 1.5;
-
   var ruleData = [
     { label:"Min $/mile",   value:"$" + minDpm.toFixed(2),  color:C.tealSoft },
     { label:"Min payout",   value:"$7.00",                   color:C.tealSoft },
@@ -514,102 +499,57 @@ function OrderChecker() {
     { label:"Top order",    value:"$10+/5mi",                color:C.tealSoft }
   ];
   var rules = ruleData.map(function(r) {
-    return '<div style="background:' + C.card + ';padding:14px 16px">' +
-      '<div style="font-size:11px;color:' + C.sand + ';font-weight:600;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">' + r.label + '</div>' +
-      '<div style="font-size:20px;font-family:' + FD + ';color:' + r.color + ';font-weight:700">' + r.value + '</div>' +
-    '</div>';
+    return '<div style="background:' + C.card + ';padding:14px 16px"><div style="font-size:11px;color:' + C.sand + ';font-weight:600;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">' + r.label + '</div><div style="font-size:20px;font-family:' + FD + ';color:' + r.color + ';font-weight:700">' + r.value + '</div></div>';
   }).join("");
 
   var resultHtml = "";
   if (o.result) {
     var r = o.result;
-    var concerns = r.reasons.length ? '<div style="margin-bottom:' + (r.positives.length ? 14 : 0) + 'px">' +
-        '<div class="eyebrow" style="color:' + C.rust + '">Concerns</div>' +
-        r.reasons.map(function(x, i) {
-          return '<div style="display:flex;gap:10px;padding:9px 0;' + (i < r.reasons.length - 1 ? "border-bottom:1px solid " + C.border : "") + '"><span style="color:' + C.rustSoft + '">\u2717</span><span style="color:' + C.creamDim + ';font-size:14px">' + esc(x) + '</span></div>';
-        }).join("") +
-      '</div>' : "";
-    var pos = r.positives.length ? '<div>' +
-        '<div class="eyebrow" style="color:' + C.tealSoft + '">Positives</div>' +
-        r.positives.map(function(x, i) {
-          return '<div style="display:flex;gap:10px;padding:9px 0;' + (i < r.positives.length - 1 ? "border-bottom:1px solid " + C.border : "") + '"><span style="color:' + C.tealSoft + '">\u2713</span><span style="color:' + C.creamDim + ';font-size:14px">' + esc(x) + '</span></div>';
-        }).join("") +
-      '</div>' : "";
-
-    resultHtml = '<div class="card" style="margin-bottom:20px;border-color:' + r.color + '55;border-width:2px">' +
-      '<div style="display:flex;flex-direction:' + (mob ? "column" : "row") + ';justify-content:space-between;align-items:' + (mob ? "flex-start" : "center") + ';margin-bottom:16px;gap:8px">' +
-        '<div>' +
-          '<div class="eyebrow">Verdict</div>' +
-          '<div class="bignum" style="font-size:' + (mob ? 44 : 52) + 'px;color:' + r.color + '">' + r.verdict + '</div>' +
-        '</div>' +
-        '<div style="text-align:' + (mob ? "left" : "right") + '">' +
-          '<div style="margin-bottom:6px">' +
-            '<div class="eyebrow">$/Mile</div>' +
-            '<div class="bignum" style="font-size:26px;color:' + r.color + '">$' + r.dpm.toFixed(2) + '</div>' +
-          '</div>' +
-          (r.hrlyRate !== null ? '<div>' +
-            '<div class="eyebrow">$/Hour (this order)</div>' +
-            '<div class="bignum" style="font-size:26px;color:' + (r.hrlyRate >= 30 ? C.tealSoft : C.rustSoft) + '">$' + r.hrlyRate.toFixed(0) + '</div>' +
-          '</div>' : "") +
-        '</div>' +
-      '</div>' +
-      concerns + pos +
-    '</div>';
+    var concerns = r.reasons.length ? '<div style="margin-bottom:' + (r.positives.length ? 14 : 0) + 'px"><div class="eyebrow" style="color:' + C.rust + '">Concerns</div>' + r.reasons.map(function(x, i) { return '<div style="display:flex;gap:10px;padding:9px 0;' + (i < r.reasons.length-1 ? "border-bottom:1px solid " + C.border : "") + '"><span style="color:' + C.rustSoft + '">\u2717</span><span style="color:' + C.creamDim + ';font-size:14px">' + esc(x) + '</span></div>'; }).join("") + '</div>' : "";
+    var pos = r.positives.length ? '<div><div class="eyebrow" style="color:' + C.tealSoft + '">Positives</div>' + r.positives.map(function(x, i) { return '<div style="display:flex;gap:10px;padding:9px 0;' + (i < r.positives.length-1 ? "border-bottom:1px solid " + C.border : "") + '"><span style="color:' + C.tealSoft + '">\u2713</span><span style="color:' + C.creamDim + ';font-size:14px">' + esc(x) + '</span></div>'; }).join("") + '</div>' : "";
+    resultHtml = '<div class="card" style="margin-bottom:20px;border-color:' + r.color + '55;border-width:2px"><div style="display:flex;flex-direction:' + (mob ? "column" : "row") + ';justify-content:space-between;align-items:' + (mob ? "flex-start" : "center") + ';margin-bottom:16px;gap:8px"><div><div class="eyebrow">Verdict</div><div class="bignum" style="font-size:' + (mob ? 44 : 52) + 'px;color:' + r.color + '">' + r.verdict + '</div></div><div style="text-align:' + (mob ? "left" : "right") + '"><div style="margin-bottom:6px"><div class="eyebrow">$/Mile</div><div class="bignum" style="font-size:26px;color:' + r.color + '">$' + r.dpm.toFixed(2) + '</div></div>' + (r.hrlyRate !== null ? '<div><div class="eyebrow">$/Hour (this order)</div><div class="bignum" style="font-size:26px;color:' + (r.hrlyRate >= 30 ? C.tealSoft : C.rustSoft) + '">$' + r.hrlyRate.toFixed(0) + '</div></div>' : "") + '</div></div>' + concerns + pos + '</div>';
   }
 
   var inputSection;
   if (o.mode === "photo") {
-    var preview = o.imgPreview ?
-      '<div style="margin-bottom:16px;border-radius:12px;overflow:hidden;border:1px solid ' + C.border + '">' +
-        '<img src="' + o.imgPreview + '" alt="Order screenshot" style="width:100%;display:block;max-height:220px;object-fit:cover" />' +
-      '</div>' : "";
-
-    var scanningNote = o.scanning ?
-      '<div style="margin-top:12px;font-size:13px;color:' + C.muted + ';text-align:center">Extracting payout, distance, and delivery time…</div>' : "";
-
-    var errorBlock = o.scanError ?
-      '<div style="margin-top:14px">' +
-        '<div style="font-size:13px;color:' + C.rustSoft + ';margin-bottom:10px">' + esc(o.scanError) + '</div>' +
-        '<button data-mode="manual" style="width:100%;padding:10px 16px;border-radius:10px;border:1px solid ' + C.border + ';background:transparent;color:' + C.amber + ';font-size:12px;font-weight:700;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase">Switch to Manual Entry \u2192</button>' +
-      '</div>' : "";
-
-    var okNote = (!o.scanning && !o.scanError && o.result) ?
-      '<div style="margin-top:12px;font-size:13px;color:' + C.tealSoft + '">\u2713 Read: $' + (o.pay || "0") + ' \u00B7 ' + (o.miles || "0") + ' mi \u00B7 ' + (o.minutes || "0") + ' min</div>' : "";
-
-    inputSection = '<div class="card" style="margin-bottom:20px">' +
-        '<div class="eyebrow" style="margin-bottom:14px">Scan Order Screen</div>' +
-        preview +
-        '<label style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:18px 24px;border-radius:14px;border:1.5px dashed ' + C.amberDim + ';background:' + C.amber + '0c;color:' + (o.scanning ? C.muted : C.amber) + ';font-size:14px;font-weight:700;cursor:' + (o.scanning ? "not-allowed" : "pointer") + ';letter-spacing:0.04em;text-transform:uppercase;box-sizing:border-box">' +
-          '<span style="font-size:18px">' + (o.scanning ? "\u23F3" : "\uD83D\uDCF7") + '</span>' +
-          (o.scanning ? "Reading order\u2026" : (o.imgPreview ? "Retake Photo" : "Take or Upload Photo")) +
-          '<input type="file" accept="image/*" capture="environment" id="scanInput" style="display:none" ' + (o.scanning ? "disabled" : "") + ' />' +
-        '</label>' +
-        scanningNote + errorBlock + okNote +
-      '</div>';
+    var preview = o.imgPreview ? '<div style="margin-bottom:16px;border-radius:12px;overflow:hidden;border:1px solid ' + C.border + '"><img src="' + o.imgPreview + '" alt="Order screenshot" style="width:100%;display:block;max-height:220px;object-fit:cover" /></div>' : "";
+    var scanningNote = o.scanning ? '<div style="margin-top:12px;font-size:13px;color:' + C.muted + ';text-align:center">Extracting payout, distance, and delivery time…</div>' : "";
+    var errorBlock = o.scanError ? '<div style="margin-top:14px"><div style="font-size:13px;color:' + C.rustSoft + ';margin-bottom:10px">' + esc(o.scanError) + '</div><button data-mode="manual" style="width:100%;padding:10px 16px;border-radius:10px;border:1px solid ' + C.border + ';background:transparent;color:' + C.amber + ';font-size:12px;font-weight:700;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase">Switch to Manual Entry \u2192</button></div>' : "";
+    var okNote = (!o.scanning && !o.scanError && o.result) ? '<div style="margin-top:12px;font-size:13px;color:' + C.tealSoft + '">\u2713 Read: $' + (o.pay || "0") + ' \u00B7 ' + (o.miles || "0") + ' mi \u00B7 ' + (o.minutes || "0") + ' min</div>' : "";
+    inputSection = '<div class="card" style="margin-bottom:20px"><div class="eyebrow" style="margin-bottom:14px">Scan Order Screen</div>' + preview + '<label style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:18px 24px;border-radius:14px;border:1.5px dashed ' + C.amberDim + ';background:' + C.amber + '0c;color:' + (o.scanning ? C.muted : C.amber) + ';font-size:14px;font-weight:700;cursor:' + (o.scanning ? "not-allowed" : "pointer") + ';letter-spacing:0.04em;text-transform:uppercase;box-sizing:border-box"><span style="font-size:18px">' + (o.scanning ? "\u23F3" : "\uD83D\uDCF7") + '</span>' + (o.scanning ? "Reading order\u2026" : (o.imgPreview ? "Retake Photo" : "Take or Upload Photo")) + '<input type="file" accept="image/*" capture="environment" id="scanInput" style="display:none" ' + (o.scanning ? "disabled" : "") + ' /></label>' + scanningNote + errorBlock + okNote + '</div>';
   } else {
-    inputSection = '<div class="card" style="margin-bottom:16px">' +
-        '<div class="eyebrow" style="margin-bottom:14px">Order Details</div>' +
-        '<div class="col">' +
-          ninput({key:"oc.pay", label:"Payout", prefix:"$", placeholder:"8.50"}) +
-          ninput({key:"oc.miles", label:"Distance (miles)", placeholder:"4.2"}) +
-          '<div>' +
-            ninput({key:"oc.minutes", label:"Delivery Time (min)", placeholder:"18"}) +
-            '<div style="font-size:12px;color:' + C.muted + ';margin-top:6px;line-height:1.5">The estimated total delivery time shown on the order \u2014 used to calculate your $/hr for this specific order.</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-      '<button class="primary-btn" id="analyzeBtn" style="margin-bottom:20px">Analyze This Order</button>';
+    inputSection = '<div class="card" style="margin-bottom:16px"><div class="eyebrow" style="margin-bottom:14px">Order Details</div><div class="col">' + ninput({key:"oc.pay", label:"Payout", prefix:"$", placeholder:"8.50"}) + ninput({key:"oc.miles", label:"Distance (miles)", placeholder:"4.2"}) + '<div>' + ninput({key:"oc.minutes", label:"Delivery Time (min)", placeholder:"18"}) + '<div style="font-size:12px;color:' + C.muted + ';margin-top:6px;line-height:1.5">The estimated total delivery time shown on the order \u2014 used to calculate your $/hr for this specific order.</div></div></div></div><button class="primary-btn" id="analyzeBtn" style="margin-bottom:20px">Analyze This Order</button>';
   }
 
   return pageHead("Decision Tool", "Order Checker", "Snap a photo of the order screen, or enter details manually.") +
     toggle({key:"oc.isEV", leftLabel:"Gas", rightLabel:"Electric", leftIcon:"\u26FD", rightIcon:"\u26A1", value:o.isEV}) +
     toggle({key:"oc.mode", leftLabel:"Photo", rightLabel:"Manual", leftIcon:"\uD83D\uDCF7", rightIcon:"\u270F\uFE0F", value:o.mode === "manual"}) +
-    inputSection +
-    resultHtml +
-    '<div class="card">' +
-      '<div class="eyebrow" style="margin-bottom:14px">Filter Rules' + (o.isEV ? " (EV-adjusted)" : "") + '</div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:' + C.border + ';border-radius:12px;overflow:hidden">' + rules + '</div>' +
-    '</div>';
+    inputSection + resultHtml +
+    '<div class="card"><div class="eyebrow" style="margin-bottom:14px">Filter Rules' + (o.isEV ? " (EV-adjusted)" : "") + '</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:' + C.border + ';border-radius:12px;overflow:hidden">' + rules + '</div></div>';
+}
+
+/* ── TOTALS ── */
+function Totals() {
+  var t = computeTotals();
+  function periodCard(label, p, accent) {
+    var net = p.gross - p.fuel;
+    var netHr = p.hours > 0 ? net / p.hours : 0;
+    var hasCosts = p.miles > 0 || p.fuel > 0;
+    return '<div class="card" style="border-top:3px solid ' + accent + ';margin-bottom:14px"><div class="row-between" style="align-items:flex-start;margin-bottom:10px"><div class="eyebrow" style="color:' + accent + '">' + label + '</div><span style="font-size:11px;color:' + C.muted + ';font-family:' + FB + '">' + p.days + (p.days === 1 ? " day" : " days") + ' logged</span></div><div class="bignum" style="font-size:' + fitFont("$" + p.gross.toFixed(2), 40) + 'px;color:' + accent + ';word-break:break-all">$' + p.gross.toFixed(2) + '</div><div style="font-size:12px;color:' + C.muted + ';margin-top:2px">total earned</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:16px"><div><div class="eyebrow" style="margin-bottom:2px">Hours</div><div style="font-size:18px;font-family:' + FM + ';color:' + C.cream + '">' + p.hours.toFixed(1) + '</div></div><div><div class="eyebrow" style="margin-bottom:2px">' + (hasCosts ? "Net/Hr" : "$/Hr") + '</div><div style="font-size:18px;font-family:' + FM + ';color:' + (netHr >= 30 ? C.tealSoft : netHr >= 20 ? C.amber : C.rustSoft) + '">$' + netHr.toFixed(2) + '</div></div><div><div class="eyebrow" style="margin-bottom:2px">Miles</div><div style="font-size:18px;font-family:' + FM + ';color:' + C.cream + '">' + (p.miles > 0 ? p.miles.toFixed(0) : "\u2014") + '</div></div></div></div>';
+  }
+  var cards = periodCard("This Week", t.week, C.tealSoft) + periodCard("This Month", t.month, C.amber) + periodCard("This Year", t.year, C.creamDim);
+  var recent = t.history.slice().sort(function(a, b) { return b.ts - a.ts; }).slice(0, 14);
+  var recentRows = recent.length ? recent.map(function(e) {
+    var net = e.gross - e.fuel;
+    var netHr = e.hours > 0 ? net / e.hours : 0;
+    var parts = e.date.split("-");
+    var dlabel = parts[1] + "/" + parts[2];
+    return '<div class="row-between" style="padding:12px 0;border-bottom:1px solid ' + C.border + '"><div><div style="font-size:14px;color:' + C.cream + ';font-family:' + FM + '">' + dlabel + '  \u00B7  $' + e.gross.toFixed(2) + '</div><div style="font-size:12px;color:' + C.muted + ';margin-top:2px">' + e.hours.toFixed(1) + ' hrs \u00B7 $' + netHr.toFixed(2) + '/hr' + (e.miles > 0 ? ' \u00B7 ' + e.miles.toFixed(0) + ' mi' : '') + '</div></div><button data-del="' + e.ts + '" style="background:transparent;border:none;color:' + C.rust + ';font-size:18px;cursor:pointer;padding:4px 8px">\u00D7</button></div>';
+  }).join("") : '<div style="font-size:14px;color:' + C.muted + ';text-align:center;padding:24px 0;line-height:1.6">No shifts logged yet.<br>Enter or scan your earnings on the Overview tab, then tap "Log This Shift."</div>';
+
+  return pageHead("Running Totals", "Your Earnings", "Logged shifts add up here. Totals build as you go and live on this device.") +
+    cards +
+    '<div class="card"><div class="eyebrow" style="margin-bottom:8px">Recent Shifts</div>' + recentRows + '</div>';
 }
 
 /* ── SCHEDULE ── */
@@ -617,69 +557,45 @@ function Schedule() {
   var s = App.sc;
   var mob = App.mobile;
   var shiftData = [
-    { name:"Lunch Rush",  badge:"Tier 2", days:"Mon\u2013Fri",  time:"10:30 AM \u2013 2:00 PM", rating:8,  color:C.amber,    note:"Office clusters are the underrated edge." },
-    { name:"Dinner Rush", badge:"Tier 1", days:"Every Day",     time:"4:30 PM \u2013 9:00 PM",  rating:10, color:C.tealSoft, note:"The highest-value window. Protect it." },
-    { name:"Late Night",  badge:"Tier 3", days:"Fri \u2013 Sat", time:"9:00 PM \u2013 1:00 AM",  rating:7,  color:C.creamDim, note:"Best in college towns and dense cities." }
+    { name:"Lunch Rush",  badge:"Tier 2", days:"Mon\u2013Fri",  time:"10:30 AM \u2013 2:00 PM", rating:8,  color:C.amber,    note:"Office clusters are the underrated edge.", sh:10, sm:30, eh:14, em:0, rrule:["MO","TU","WE","TH","FR"], idx:0 },
+    { name:"Dinner Rush", badge:"Tier 1", days:"Every Day",     time:"4:30 PM \u2013 9:00 PM",  rating:10, color:C.tealSoft, note:"The highest-value window. Protect it.", sh:16, sm:30, eh:21, em:0, rrule:["SU","MO","TU","WE","TH","FR","SA"], idx:1 },
+    { name:"Late Night",  badge:"Tier 3", days:"Fri \u2013 Sat", time:"9:00 PM \u2013 1:00 AM",  rating:7,  color:C.creamDim, note:"Best in college towns and dense cities.", sh:21, sm:0, eh:1, em:0, rrule:["FR","SA"], idx:2 }
   ];
   var SHIFTS = shiftData.map(function(x) {
-    return '<div class="card" style="border-top:3px solid ' + x.color + '">' +
-      '<div class="row-between" style="align-items:flex-start;margin-bottom:12px">' +
-        '<h3 style="font-family:' + FD + ';font-size:20px;color:' + C.cream + '">' + x.name + '</h3>' +
-        pill(x.badge, x.color) +
-      '</div>' +
-      '<div style="font-size:12px;color:' + C.sand + ';margin-bottom:2px">' + x.days + '</div>' +
-      '<div style="font-size:15px;color:' + C.creamDim + ';font-family:' + FM + ';margin-bottom:12px">' + x.time + '</div>' +
-      ratingBar(x.rating, x.color) +
-      '<div style="margin-top:12px;font-size:13px;color:' + C.muted + ';font-style:italic;line-height:1.6">' + x.note + '</div>' +
-    '</div>';
+    return '<div class="card" style="border-top:3px solid ' + x.color + '"><div class="row-between" style="align-items:flex-start;margin-bottom:12px"><h3 style="font-family:' + FD + ';font-size:20px;color:' + C.cream + '">' + x.name + '</h3>' + pill(x.badge, x.color) + '</div><div style="font-size:12px;color:' + C.sand + ';margin-bottom:2px">' + x.days + '</div><div style="font-size:15px;color:' + C.creamDim + ';font-family:' + FM + ';margin-bottom:12px">' + x.time + '</div>' + ratingBar(x.rating, x.color) + '<div style="margin-top:12px;font-size:13px;color:' + C.muted + ';font-style:italic;line-height:1.6">' + x.note + '</div><button data-shift="' + x.idx + '" style="margin-top:14px;width:100%;padding:11px 16px;border-radius:10px;border:1px solid ' + x.color + '55;background:' + x.color + '12;color:' + x.color + ';font-size:12px;font-weight:700;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase">\uD83D\uDCC5 Add to Calendar</button></div>';
   }).join("");
+  window._deliver30Shifts = shiftData;
 
   var avoidData = [
     { time:"2:00 PM \u2013 4:30 PM", reason:"Dead zone \u2014 low volume, poor order quality" },
     { time:"7:00 AM \u2013 9:00 AM", reason:"Breakfast earns less \u2014 low tips, small tickets" }
   ];
   var AVOID = avoidData.map(function(a, i) {
-    return '<div style="padding:12px 0;' + (i < avoidData.length - 1 ? "border-bottom:1px solid " + C.border : "") + '">' +
-      '<div style="font-size:14px;color:' + C.rustSoft + ';font-family:' + FM + ';margin-bottom:4px">' + a.time + '</div>' +
-      '<div style="font-size:13px;color:' + C.muted + '">' + a.reason + '</div>' +
-    '</div>';
+    return '<div style="padding:12px 0;' + (i < avoidData.length-1 ? "border-bottom:1px solid " + C.border : "") + '"><div style="font-size:14px;color:' + C.rustSoft + ';font-family:' + FM + ';margin-bottom:4px">' + a.time + '</div><div style="font-size:13px;color:' + C.muted + '">' + a.reason + '</div></div>';
   }).join("");
 
   var ALL_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  var dayBtns = ALL_DAYS.map(function(d) {
-    return '<button class="day-btn ' + (s.days.indexOf(d) !== -1 ? "active" : "") + '" data-day="' + d + '">' + d + '</button>';
-  }).join("");
+  var dayBtns = ALL_DAYS.map(function(d) { return '<button class="day-btn ' + (s.days.indexOf(d) !== -1 ? "active" : "") + '" data-day="' + d + '">' + d + '</button>'; }).join("");
   var hrs = s.days.length * 3.5, projGross = hrs * 35, projNet = hrs * 27;
-
   var planData = [
     { label:"Peak Hours", value:hrs.toFixed(1) + " hrs" },
     { label:"Est. Gross", value:"$" + projGross.toFixed(0) },
     { label:"Est. Net",   value:"$" + projNet.toFixed(0) }
   ];
-  var planStats = planData.map(function(x) {
-    return '<div style="text-align:center">' +
-      '<div class="eyebrow" style="margin-bottom:4px">' + x.label + '</div>' +
-      '<div class="bignum" style="font-size:22px;color:' + C.amber + '">' + x.value + '</div>' +
-    '</div>';
-  }).join("");
+  var planStats = planData.map(function(x) { return '<div style="text-align:center"><div class="eyebrow" style="margin-bottom:4px">' + x.label + '</div><div class="bignum" style="font-size:22px;color:' + C.amber + '">' + x.value + '</div></div>'; }).join("");
+
+  var weekBtn = s.days.length ? '<button id="addWeekCal" style="width:100%;margin-top:16px;padding:13px 16px;border-radius:10px;border:none;background:linear-gradient(135deg, ' + C.amberDim + ', ' + C.amber + ');color:#0e0c0a;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase">\uD83D\uDCC5 Add My ' + s.days.length + ' Days to Calendar</button><div style="margin-top:8px;font-size:11px;color:' + C.muted + ';text-align:center;line-height:1.5">Adds recurring dinner-rush blocks (4:30\u20139 PM) for your selected days, with a 15-min reminder.</div>' : '<div style="margin-top:16px;font-size:12px;color:' + C.muted + ';text-align:center">Select days above to add them to your calendar.</div>';
 
   return pageHead("Peak Hours", "Shift Schedule", "Only three windows are worth your time.") +
     '<div style="display:flex;flex-direction:column;gap:14px;margin-bottom:20px">' + SHIFTS + '</div>' +
-    '<div class="card" style="margin-bottom:16px">' +
-      '<div class="eyebrow" style="color:' + C.rust + ';margin-bottom:12px">Windows to Avoid</div>' + AVOID +
-    '</div>' +
-    '<div class="card">' +
-      '<div class="eyebrow" style="margin-bottom:14px">Weekly Planner</div>' +
-      '<div style="display:flex;gap:' + (mob ? 6 : 8) + 'px;margin-bottom:20px;flex-wrap:wrap">' + dayBtns + '</div>' +
-      '<div class="divider" style="margin-bottom:16px"></div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">' + planStats + '</div>' +
-    '</div>';
+    '<div class="card" style="margin-bottom:16px"><div class="eyebrow" style="color:' + C.rust + ';margin-bottom:12px">Windows to Avoid</div>' + AVOID + '</div>' +
+    '<div class="card"><div class="eyebrow" style="margin-bottom:14px">Weekly Planner</div><div style="display:flex;gap:' + (mob ? 6 : 8) + 'px;margin-bottom:20px;flex-wrap:wrap">' + dayBtns + '</div><div class="divider" style="margin-bottom:16px"></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">' + planStats + '</div>' + weekBtn + '</div>';
 }
 
 /* ── EXPENSES ── */
 function Expenses() {
   var e = App.ex;
-  var mi = num(e.wkMiles), dep = num(e.depRate);
+  var mi = num(e.wkMiles);
   var gasFuel = (mi / num(e.mpg, 1)) * num(e.gasPrice);
   var fastPct = num(e.fastChargePct) / 100;
   var blendedRate = (num(e.elecPrice) * (1 - fastPct)) + (num(e.fastChargePrice) * fastPct);
@@ -687,101 +603,39 @@ function Expenses() {
   var fuelCost = e.isEV ? evFuel : gasFuel;
   var maint = mi * (e.isEV ? 0.025 : 0.05);
   var tires = mi * (e.isEV ? 0.025 : 0.02);
-  var deprec = mi * dep;
   var ins = 20;
-  var total = fuelCost + maint + tires + deprec + ins;
+  var total = fuelCost + maint + tires + ins;
   var cpm = mi > 0 ? total / mi : 0;
   var taxDed = mi * 0.67;
 
   var inputs = e.isEV ?
-    ninput({key:"ex.kwhPer100", label:"kWh per 100 mi", placeholder:"30"}) +
-    ninput({key:"ex.elecPrice", label:"Home Rate ($/kWh)", prefix:"$", placeholder:"0.16"}) +
-    ninput({key:"ex.fastChargePct", label:"% DC Fast Charged", placeholder:"20"}) +
-    ninput({key:"ex.fastChargePrice", label:"Fast Charge ($/kWh)", prefix:"$", placeholder:"0.42"}) +
-    ninput({key:"ex.wkMiles", label:"Weekly Miles", placeholder:"300"}) +
-    ninput({key:"ex.depRate", label:"Depreciation ($/mi)", prefix:"$", placeholder:"0.07"})
+    ninput({key:"ex.kwhPer100", label:"kWh per 100 mi", placeholder:"30"}) + ninput({key:"ex.elecPrice", label:"Home Rate ($/kWh)", prefix:"$", placeholder:"0.16"}) + ninput({key:"ex.fastChargePct", label:"% DC Fast Charged", placeholder:"20"}) + ninput({key:"ex.fastChargePrice", label:"Fast Charge ($/kWh)", prefix:"$", placeholder:"0.42"}) + ninput({key:"ex.wkMiles", label:"Weekly Miles", placeholder:"300"})
   :
-    ninput({key:"ex.mpg", label:"Vehicle MPG", placeholder:"28"}) +
-    ninput({key:"ex.gasPrice", label:"Gas ($/gal)", prefix:"$", placeholder:"3.50"}) +
-    ninput({key:"ex.wkMiles", label:"Weekly Miles", placeholder:"300"}) +
-    ninput({key:"ex.depRate", label:"Depreciation ($/mi)", prefix:"$", placeholder:"0.07"});
+    ninput({key:"ex.mpg", label:"Vehicle MPG", placeholder:"28"}) + ninput({key:"ex.gasPrice", label:"Gas ($/gal)", prefix:"$", placeholder:"3.50"}) + ninput({key:"ex.wkMiles", label:"Weekly Miles", placeholder:"300"});
 
-  var blendedCard = e.isEV ? '<div class="card" style="margin-bottom:16px;border-color:' + C.teal + '44">' +
-      '<div class="eyebrow" style="color:' + C.tealSoft + '">Blended Electricity Rate</div>' +
-      '<div class="bignum" style="font-size:26px;color:' + C.tealSoft + '">$' + blendedRate.toFixed(3) + '/kWh</div>' +
-      '<div style="margin-top:6px;font-size:12px;color:' + C.muted + '">' + e.fastChargePct + '% fast-charger use blended with home charging rate</div>' +
-    '</div>' : "";
+  var blendedCard = e.isEV ? '<div class="card" style="margin-bottom:16px;border-color:' + C.teal + '44"><div class="eyebrow" style="color:' + C.tealSoft + '">Blended Electricity Rate</div><div class="bignum" style="font-size:26px;color:' + C.tealSoft + '">$' + blendedRate.toFixed(3) + '/kWh</div><div style="margin-top:6px;font-size:12px;color:' + C.muted + '">' + e.fastChargePct + '% fast-charger use blended with home charging rate</div></div>' : "";
 
   var bd = [
     { label:e.isEV ? "Electricity" : "Fuel", val:fuelCost },
     { label:"Maintenance Reserve", val:maint },
     { label:"Tire Reserve", val:tires },
-    { label:"Depreciation", val:deprec },
     { label:"Insurance Share", val:ins }
   ];
-  var breakdown = bd.map(function(b, i) {
-    return '<div>' +
-      '<div class="row-between" style="padding:11px 0">' +
-        '<span style="color:' + C.creamDim + ';font-size:15px">' + b.label + '</span>' +
-        '<span style="color:' + C.cream + ';font-size:15px;font-family:' + FM + '">$' + b.val.toFixed(2) + '</span>' +
-      '</div>' +
-      (i < bd.length - 1 ? '<div class="divider"></div>' : "") +
-    '</div>';
-  }).join("");
+  var breakdown = bd.map(function(b, i) { return '<div><div class="row-between" style="padding:11px 0"><span style="color:' + C.creamDim + ';font-size:15px">' + b.label + '</span><span style="color:' + C.cream + ';font-size:15px;font-family:' + FM + '">$' + b.val.toFixed(2) + '</span></div>' + (i < bd.length-1 ? '<div class="divider"></div>' : "") + '</div>'; }).join("");
 
-  var evNotes = e.isEV ? '<div class="card" style="margin-bottom:16px;border-color:' + C.tealSoft + '33">' +
-      '<div class="eyebrow" style="color:' + C.tealSoft + '">EV Driver Notes</div>' +
-      '<div style="font-size:14px;color:' + C.creamDim + ';line-height:1.7">Charge at home overnight whenever possible \u2014 DC fast chargers cost 2\u20133\u00D7 more per kWh. Regenerative braking also means brake pads last far longer than on gas vehicles.</div>' +
-    '</div>' : "";
+  var evNotes = e.isEV ? '<div class="card" style="margin-bottom:16px;border-color:' + C.tealSoft + '33"><div class="eyebrow" style="color:' + C.tealSoft + '">EV Driver Notes</div><div style="font-size:14px;color:' + C.creamDim + ';line-height:1.7">Charge at home overnight whenever possible \u2014 DC fast chargers cost 2\u20133\u00D7 more per kWh. Regenerative braking also means brake pads last far longer than on gas vehicles.</div></div>' : "";
 
-  var ded = [
-    "Mileage deduction \u2014 usually your largest write-off",
-    "Phone bill \u2014 business-use % only",
-    "Phone mount & accessories",
-    "Hot bags & insulated carriers",
-    "Parking & tolls (business only)"
-  ];
+  var ded = ["Mileage deduction \u2014 usually your largest write-off", "Phone bill \u2014 business-use % only", "Phone mount & accessories", "Hot bags & insulated carriers", "Parking & tolls (business only)"];
   if (e.isEV) ded.push("Home charging equipment (business-use %)");
-  var deductions = ded.map(function(item) {
-    return '<div class="checklist-item">' +
-      '<div class="checklist-box"><div class="dot"></div></div>' +
-      '<span style="font-size:14px;color:' + C.creamDim + ';line-height:1.5">' + item + '</span>' +
-    '</div>';
-  }).join("");
+  var deductions = ded.map(function(item) { return '<div class="checklist-item"><div class="checklist-box"><div class="dot"></div></div><span style="font-size:14px;color:' + C.creamDim + ';line-height:1.5">' + item + '</span></div>'; }).join("");
 
   return pageHead("Vehicle Cost Tracker", "Expenses", "Know your real cost per mile. Gross pay means nothing without it.") +
     toggle({key:"ex.isEV", leftLabel:"Gas", rightLabel:"Electric", leftIcon:"\u26FD", rightIcon:"\u26A1", value:e.isEV}) +
-    '<div class="grid2" style="margin-bottom:20px">' + inputs + '</div>' +
-    blendedCard +
-    '<div class="card" style="margin-bottom:16px">' +
-      '<div class="eyebrow" style="margin-bottom:14px">Weekly Cost Breakdown</div>' +
-      breakdown +
-      '<div style="margin-top:10px;padding-top:14px;border-top:2px solid ' + C.border + '" class="row-between">' +
-        '<span style="color:' + C.cream + ';font-weight:700">Total Weekly</span>' +
-        '<div class="bignum" style="font-size:28px;color:' + C.rustSoft + '">$' + total.toFixed(2) + '</div>' +
-      '</div>' +
-    '</div>' +
-    '<div class="grid2" style="margin-bottom:16px">' +
-      '<div class="card glow">' +
-        '<div class="eyebrow">Cost Per Mile</div>' +
-        '<div class="bignum" style="font-size:30px;color:' + (cpm <= (e.isEV ? 0.18 : 0.25) ? C.tealSoft : cpm <= (e.isEV ? 0.28 : 0.35) ? C.amber : C.rustSoft) + '">$' + cpm.toFixed(3) + '</div>' +
-        '<div style="margin-top:6px;font-size:12px;color:' + C.muted + '">Target: under $' + (e.isEV ? "0.18" : "0.25") + '</div>' +
-      '</div>' +
-      '<div class="card">' +
-        '<div class="eyebrow">IRS Mileage Deduction</div>' +
-        '<div class="bignum" style="font-size:30px;color:' + C.amber + '">$' + taxDed.toFixed(2) + '</div>' +
-        '<div style="margin-top:6px;font-size:12px;color:' + C.muted + '">' + e.wkMiles + ' mi \u00D7 $0.67/mi</div>' +
-      '</div>' +
-    '</div>' +
+    '<div class="grid2" style="margin-bottom:20px">' + inputs + '</div>' + blendedCard +
+    '<div class="card" style="margin-bottom:16px"><div class="eyebrow" style="margin-bottom:14px">Weekly Cost Breakdown</div>' + breakdown + '<div style="margin-top:10px;padding-top:14px;border-top:2px solid ' + C.border + '" class="row-between"><span style="color:' + C.cream + ';font-weight:700">Total Weekly</span><div class="bignum" style="font-size:28px;color:' + C.rustSoft + '">$' + total.toFixed(2) + '</div></div></div>' +
+    '<div class="grid2" style="margin-bottom:16px"><div class="card glow"><div class="eyebrow">Cost Per Mile</div><div class="bignum" style="font-size:30px;color:' + (cpm <= (e.isEV ? 0.18 : 0.25) ? C.tealSoft : cpm <= (e.isEV ? 0.28 : 0.35) ? C.amber : C.rustSoft) + '">$' + cpm.toFixed(3) + '</div><div style="margin-top:6px;font-size:12px;color:' + C.muted + '">Target: under $' + (e.isEV ? "0.18" : "0.25") + '</div></div><div class="card"><div class="eyebrow">IRS Mileage Deduction</div><div class="bignum" style="font-size:30px;color:' + C.amber + '">$' + taxDed.toFixed(2) + '</div><div style="margin-top:6px;font-size:12px;color:' + C.muted + '">' + e.wkMiles + ' mi \u00D7 $0.67/mi</div></div></div>' +
     evNotes +
-    '<div class="card" style="margin-bottom:16px;border-color:' + C.amber + '44">' +
-      '<div class="eyebrow" style="color:' + C.amber + '">Tax Reserve Reminder</div>' +
-      '<div style="font-size:14px;color:' + C.creamDim + ';line-height:1.7">Transfer <span style="color:' + C.amber + ';font-weight:600">20% of gross weekly</span> into a separate account. Don\'t wait until April.</div>' +
-    '</div>' +
-    '<div class="card">' +
-      '<div class="eyebrow" style="margin-bottom:14px">Tax Deduction Checklist</div>' +
-      '<div class="checklist">' + deductions + '</div>' +
-    '</div>';
+    '<div class="card"><div class="eyebrow" style="margin-bottom:14px">Tax Deduction Checklist</div><div class="checklist">' + deductions + '</div></div>';
 }
 
 /* ── CALCULATOR ── */
@@ -793,9 +647,8 @@ function Calculator() {
   var gasFuelHr = (milesHr / num(c.mpg, 1)) * num(c.gasP);
   var evFuelHr = (milesHr / 100) * num(c.kwhPer100) * num(c.elecPrice);
   var fuelHr = c.isEV ? evFuelHr : gasFuelHr;
-  var depHr = milesHr * num(c.depM);
   var maintHr = milesHr * (c.isEV ? 0.025 : 0.05);
-  var totalExp = fuelHr + depHr + maintHr;
+  var totalExp = fuelHr + maintHr;
   var netHr = grossHr - totalExp;
   var dpm = milesHr > 0 ? grossHr / milesHr : 0;
   var shortfall = Math.max(0, 30 - netHr);
@@ -804,13 +657,9 @@ function Calculator() {
   var netColor = netHr >= 30 ? C.tealSoft : netHr >= 20 ? C.amber : C.rustSoft;
 
   var vehInputs = c.isEV ?
-    ninput({key:"cl.kwhPer100", label:"kWh per 100 mi", placeholder:"30"}) +
-    ninput({key:"cl.elecPrice", label:"Electricity ($/kWh)", prefix:"$", placeholder:"0.16"}) +
-    ninput({key:"cl.depM", label:"Depreciation ($/mi)", prefix:"$", placeholder:"0.07"})
+    ninput({key:"cl.kwhPer100", label:"kWh per 100 mi", placeholder:"30"}) + ninput({key:"cl.elecPrice", label:"Electricity ($/kWh)", prefix:"$", placeholder:"0.16"})
   :
-    ninput({key:"cl.gasP", label:"Gas Price ($/gal)", prefix:"$", placeholder:"3.50"}) +
-    ninput({key:"cl.mpg", label:"Vehicle MPG", placeholder:"28"}) +
-    ninput({key:"cl.depM", label:"Depreciation ($/mi)", prefix:"$", placeholder:"0.07"});
+    ninput({key:"cl.gasP", label:"Gas Price ($/gal)", prefix:"$", placeholder:"3.50"}) + ninput({key:"cl.mpg", label:"Vehicle MPG", placeholder:"28"});
 
   var gridData = [
     { label:"Gross / Hour",    value:"$" + grossHr.toFixed(2),  color:C.cream },
@@ -818,13 +667,7 @@ function Calculator() {
     { label:"Avg Order Value", value:"$" + aov.toFixed(2),      color:C.amber },
     { label:"$/Mile", value:"$" + dpm.toFixed(2), color:dpm >= 2 ? C.tealSoft : C.rustSoft, sub:dpm >= 2 ? "Above minimum" : "Below $2 target" }
   ];
-  var grid = gridData.map(function(x) {
-    return '<div class="card">' +
-      '<div class="eyebrow">' + x.label + '</div>' +
-      '<div class="bignum" style="font-size:26px;color:' + x.color + '">' + x.value + '</div>' +
-      (x.sub ? '<div style="margin-top:6px;font-size:12px;color:' + C.muted + '">' + x.sub + '</div>' : "") +
-    '</div>';
-  }).join("");
+  var grid = gridData.map(function(x) { return '<div class="card"><div class="eyebrow">' + x.label + '</div><div class="bignum" style="font-size:26px;color:' + x.color + '">' + x.value + '</div>' + (x.sub ? '<div style="margin-top:6px;font-size:12px;color:' + C.muted + '">' + x.sub + '</div>' : "") + '</div>'; }).join("");
 
   var neededData = [
     { label:"Required Gross/Hr",   val:"$" + neededGross.toFixed(2) },
@@ -832,184 +675,77 @@ function Calculator() {
     { label:"Hourly Vehicle Cost", val:"$" + totalExp.toFixed(2) },
     { label:"Miles Driven/Hr",     val:milesHr.toFixed(1) + " mi" }
   ];
-  var needed = neededData.map(function(x, i) {
-    return '<div>' +
-      '<div class="row-between" style="padding:11px 0">' +
-        '<span style="color:' + C.muted + ';font-size:14px">' + x.label + '</span>' +
-        '<span style="color:' + C.cream + ';font-size:14px;font-family:' + FM + '">' + x.val + '</span>' +
-      '</div>' +
-      (i < neededData.length - 1 ? '<div class="divider"></div>' : "") +
-    '</div>';
-  }).join("");
+  var needed = neededData.map(function(x, i) { return '<div><div class="row-between" style="padding:11px 0"><span style="color:' + C.muted + ';font-size:14px">' + x.label + '</span><span style="color:' + C.cream + ';font-size:14px;font-family:' + FM + '">' + x.val + '</span></div>' + (i < neededData.length-1 ? '<div class="divider"></div>' : "") + '</div>'; }).join("");
 
   return pageHead("Earnings Model", "$30/Hr Calculator", "Plug in your averages. See exactly what you need to hit $30 net.") +
     toggle({key:"cl.isEV", leftLabel:"Gas", rightLabel:"Electric", leftIcon:"\u26FD", rightIcon:"\u26A1", value:c.isEV}) +
-    '<div class="card" style="margin-bottom:16px">' +
-      '<div class="eyebrow" style="margin-bottom:14px">Delivery Metrics</div>' +
-      '<div class="col">' +
-        ninput({key:"cl.dph", label:"Deliveries per Hour", placeholder:"3"}) +
-        ninput({key:"cl.base", label:"Avg Base Pay", prefix:"$", placeholder:"3.50"}) +
-        ninput({key:"cl.tip", label:"Avg Tip", prefix:"$", placeholder:"8.00"}) +
-        ninput({key:"cl.peakPay", label:"Avg Peak Pay per Order", prefix:"$", placeholder:"0.00"}) +
-        ninput({key:"cl.mpd", label:"Avg Miles per Delivery", placeholder:"4"}) +
-      '</div>' +
-    '</div>' +
-    '<div class="card" style="margin-bottom:16px">' +
-      '<div class="eyebrow" style="margin-bottom:14px">Vehicle Costs</div>' +
-      '<div class="col">' + vehInputs + '</div>' +
-    '</div>' +
-    '<div class="card glow" style="margin-bottom:16px;border-top:3px solid ' + netColor + '">' +
-      '<div class="eyebrow">Net Hourly (after vehicle costs)</div>' +
-      '<div class="bignum" style="font-size:' + fitFont("$" + netHr.toFixed(2), 68) + 'px;color:' + netColor + ';word-break:break-all">$' + netHr.toFixed(2) + '</div>' +
-      '<div style="margin-top:8px;font-size:14px;color:' + (shortfall > 0 ? C.rust : C.tealSoft) + '">' + (shortfall > 0 ? "$" + shortfall.toFixed(2) + "/hr below $30 target" : "\u2713 Hitting the $30 target") + '</div>' +
-    '</div>' +
+    '<div class="card" style="margin-bottom:16px"><div class="eyebrow" style="margin-bottom:14px">Delivery Metrics</div><div class="col">' + ninput({key:"cl.dph", label:"Deliveries per Hour", placeholder:"3"}) + ninput({key:"cl.base", label:"Avg Base Pay", prefix:"$", placeholder:"3.50"}) + ninput({key:"cl.tip", label:"Avg Tip", prefix:"$", placeholder:"8.00"}) + ninput({key:"cl.peakPay", label:"Avg Peak Pay per Order", prefix:"$", placeholder:"0.00"}) + ninput({key:"cl.mpd", label:"Avg Miles per Delivery", placeholder:"4"}) + '</div></div>' +
+    '<div class="card" style="margin-bottom:16px"><div class="eyebrow" style="margin-bottom:14px">Vehicle Costs</div><div class="col">' + vehInputs + '</div></div>' +
+    '<div class="card glow" style="margin-bottom:16px;border-top:3px solid ' + netColor + '"><div class="eyebrow">Net Hourly (after vehicle costs)</div><div class="bignum" style="font-size:' + fitFont("$" + netHr.toFixed(2), 68) + 'px;color:' + netColor + ';word-break:break-all">$' + netHr.toFixed(2) + '</div><div style="margin-top:8px;font-size:14px;color:' + (shortfall > 0 ? C.rust : C.tealSoft) + '">' + (shortfall > 0 ? "$" + shortfall.toFixed(2) + "/hr below $30 target" : "\u2713 Hitting the $30 target") + '</div></div>' +
     '<div class="grid2" style="margin-bottom:16px">' + grid + '</div>' +
-    '<div class="card" style="border-color:' + C.amber + '44">' +
-      '<div class="eyebrow" style="margin-bottom:14px">What You Need to Hit $30</div>' + needed +
-    '</div>';
+    '<div class="card" style="border-color:' + C.amber + '44"><div class="eyebrow" style="margin-bottom:14px">What You Need to Hit $30</div>' + needed + '</div>';
 }
 
 /* ── RENDER ── */
-var PANELS = [Overview, OrderChecker, Schedule, Expenses, Calculator];
+var PANELS = [Overview, OrderChecker, Totals, Schedule, Expenses, Calculator];
 
 function render() {
   App.mobile = window.innerWidth < 768;
   var panelHtml = PANELS[App.tab]();
   var root = $("root");
-
   if (App.mobile) {
-    root.innerHTML =
-      '<div class="app">' +
-        '<div class="topbar">' +
-          '<div style="font-family:' + FD + ';font-size:22px;font-weight:800;color:' + C.amber + '">Deliver30</div>' +
-          '<div style="font-size:10px;color:' + C.sand + ';margin-left:10px;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px">$30/hr System</div>' +
-        '</div>' +
-        '<div class="main-mobile"><div class="main-mobile-inner">' + panelHtml + '</div></div>' +
-        '<div class="tabbar">' +
-          NAV.map(function(n) {
-            return '<button class="tab-btn ' + (App.tab === n.id ? "active" : "") + '" data-tab="' + n.id + '">' +
-              '<span class="ic">' + n.icon + '</span>' +
-              '<span class="lbl">' + n.label + '</span>' +
-              (App.tab === n.id ? '<div class="tab-underline"></div>' : "") +
-            '</button>';
-          }).join("") +
-        '</div>' +
-      '</div>';
+    root.innerHTML = '<div class="app"><div class="topbar"><div style="font-family:' + FD + ';font-size:22px;font-weight:800;color:' + C.amber + '">Deliver30</div><div style="font-size:10px;color:' + C.sand + ';margin-left:10px;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px">$30/hr System</div></div><div class="main-mobile"><div class="main-mobile-inner">' + panelHtml + '</div></div><div class="tabbar">' + NAV.map(function(n) { return '<button class="tab-btn ' + (App.tab === n.id ? "active" : "") + '" data-tab="' + n.id + '"><span class="ic">' + n.icon + '</span><span class="lbl">' + n.label + '</span>' + (App.tab === n.id ? '<div class="tab-underline"></div>' : "") + '</button>'; }).join("") + '</div></div>';
   } else {
-    root.innerHTML =
-      '<div class="app">' +
-        '<div class="sidebar">' +
-          '<div class="sidebar-brand">' +
-            '<div style="font-family:' + FD + ';font-size:26px;font-weight:800;color:' + C.amber + '">Deliver30</div>' +
-            '<div style="font-size:11px;color:' + C.sand + ';letter-spacing:0.1em;text-transform:uppercase;margin-top:2px">$30/hr System</div>' +
-          '</div>' +
-          '<nav class="sidebar-nav">' +
-            NAV.map(function(n) {
-              return '<button class="nav-btn ' + (App.tab === n.id ? "active" : "") + '" data-tab="' + n.id + '">' +
-                '<span class="ic">' + n.icon + '</span>' + n.label +
-              '</button>';
-            }).join("") +
-          '</nav>' +
-          '<div class="sidebar-foot">' +
-            '<div style="font-size:12px;color:' + C.muted + ';line-height:1.6;font-style:italic">"Treat delivery like a logistics business, not a side gig."</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="main-desktop"><div class="main-inner">' + panelHtml + '</div></div>' +
-      '</div>';
+    root.innerHTML = '<div class="app"><div class="sidebar"><div class="sidebar-brand"><div style="font-family:' + FD + ';font-size:26px;font-weight:800;color:' + C.amber + '">Deliver30</div><div style="font-size:11px;color:' + C.sand + ';letter-spacing:0.1em;text-transform:uppercase;margin-top:2px">$30/hr System</div></div><nav class="sidebar-nav">' + NAV.map(function(n) { return '<button class="nav-btn ' + (App.tab === n.id ? "active" : "") + '" data-tab="' + n.id + '"><span class="ic">' + n.icon + '</span>' + n.label + '</button>'; }).join("") + '</nav><div class="sidebar-foot"><div style="font-size:12px;color:' + C.muted + ';line-height:1.6;font-style:italic">"Treat delivery like a logistics business, not a side gig."</div></div></div><div class="main-desktop"><div class="main-inner">' + panelHtml + '</div></div></div>';
   }
-
   bindEvents();
 }
 
 function bindEvents() {
   var tabs = document.querySelectorAll("[data-tab]");
-  for (var i = 0; i < tabs.length; i++) {
-    (function(btn) {
-      btn.addEventListener("click", function() { App.tab = parseInt(btn.getAttribute("data-tab"), 10); render(); });
-    })(tabs[i]);
-  }
+  for (var i = 0; i < tabs.length; i++) { (function(b) { b.addEventListener("click", function() { App.tab = parseInt(b.getAttribute("data-tab"), 10); render(); }); })(tabs[i]); }
 
   var inputs = document.querySelectorAll("input[data-key]");
-  for (var j = 0; j < inputs.length; j++) {
-    (function(inp) {
-      inp.addEventListener("input", function() {
-        setByKey(inp.getAttribute("data-key"), inp.value);
-        saveState();
-        liveUpdate();
-      });
-    })(inputs[j]);
-  }
+  for (var j = 0; j < inputs.length; j++) { (function(inp) { inp.addEventListener("input", function() { setByKey(inp.getAttribute("data-key"), inp.value); if (App.ov.justLogged) App.ov.justLogged = null; saveState(); liveUpdate(); }); })(inputs[j]); }
 
   var toggles = document.querySelectorAll("[data-toggle]");
-  for (var k = 0; k < toggles.length; k++) {
-    (function(btn) {
-      btn.addEventListener("click", function() {
-        var key = btn.getAttribute("data-toggle");
-        var boolVal = btn.getAttribute("data-val") === "true";
-        if (key === "oc.mode") {
-          App.oc.mode = boolVal ? "manual" : "photo";
-          App.oc.scanError = null;
-        } else {
-          setByKey(key, boolVal);
-          if (key === "oc.isEV") App.oc.result = null;
-        }
-        saveState();
-        render();
-      });
-    })(toggles[k]);
-  }
+  for (var k = 0; k < toggles.length; k++) { (function(b) { b.addEventListener("click", function() { var key = b.getAttribute("data-toggle"); var bv = b.getAttribute("data-val") === "true"; if (key === "oc.mode") { App.oc.mode = bv ? "manual" : "photo"; App.oc.scanError = null; } else { setByKey(key, bv); if (key === "oc.isEV") App.oc.result = null; } saveState(); render(); }); })(toggles[k]); }
 
   var tips = document.querySelectorAll("[data-tip]");
-  for (var t = 0; t < tips.length; t++) {
-    (function(d) {
-      d.addEventListener("click", function() { App.ov.tipIdx = parseInt(d.getAttribute("data-tip"), 10); render(); });
-    })(tips[t]);
-  }
+  for (var t = 0; t < tips.length; t++) { (function(d) { d.addEventListener("click", function() { App.ov.tipIdx = parseInt(d.getAttribute("data-tip"), 10); render(); }); })(tips[t]); }
 
   var dayBtns = document.querySelectorAll("[data-day]");
-  for (var dd = 0; dd < dayBtns.length; dd++) {
-    (function(b) {
-      b.addEventListener("click", function() {
-        var d = b.getAttribute("data-day");
-        var idx = App.sc.days.indexOf(d);
-        if (idx !== -1) App.sc.days.splice(idx, 1);
-        else App.sc.days.push(d);
-        saveState();
-        render();
-      });
-    })(dayBtns[dd]);
-  }
+  for (var dd = 0; dd < dayBtns.length; dd++) { (function(b) { b.addEventListener("click", function() { var d = b.getAttribute("data-day"); var idx = App.sc.days.indexOf(d); if (idx !== -1) App.sc.days.splice(idx, 1); else App.sc.days.push(d); saveState(); render(); }); })(dayBtns[dd]); }
 
   var ab = $("analyzeBtn");
-  if (ab) ab.addEventListener("click", function() {
-    var o = App.oc;
-    App.oc.result = analyzeValues(num(o.pay), num(o.miles, 1), num(o.minutes), o.isEV);
-    render();
-  });
+  if (ab) ab.addEventListener("click", function() { var o = App.oc; App.oc.result = analyzeValues(num(o.pay), num(o.miles, 1), num(o.minutes), o.isEV); render(); });
 
   var si = $("scanInput");
-  if (si) si.addEventListener("change", function(e) {
-    var file = e.target.files && e.target.files[0];
-    if (file) handleScan(file);
-  });
+  if (si) si.addEventListener("change", function(e) { var file = e.target.files && e.target.files[0]; if (file) handleScan(file); });
+
+  var ovsi = $("ovScanInput");
+  if (ovsi) ovsi.addEventListener("change", function(e) { var file = e.target.files && e.target.files[0]; if (file) handleOverviewScan(file); });
+
+  var logBtn = $("logShiftBtn");
+  if (logBtn) logBtn.addEventListener("click", function() { if (logShift()) render(); });
+
+  var delBtns = document.querySelectorAll("[data-del]");
+  for (var db = 0; db < delBtns.length; db++) { (function(b) { b.addEventListener("click", function() { deleteShift(parseInt(b.getAttribute("data-del"), 10)); render(); }); })(delBtns[db]); }
 
   var modes = document.querySelectorAll("[data-mode]");
-  for (var mm = 0; mm < modes.length; mm++) {
-    (function(b) {
-      b.addEventListener("click", function() {
-        App.oc.mode = b.getAttribute("data-mode");
-        App.oc.scanError = null;
-        render();
-      });
-    })(modes[mm]);
-  }
+  for (var mm = 0; mm < modes.length; mm++) { (function(b) { b.addEventListener("click", function() { App.oc.mode = b.getAttribute("data-mode"); App.oc.scanError = null; render(); }); })(modes[mm]); }
+
+  var shiftBtns = document.querySelectorAll("[data-shift]");
+  for (var sb = 0; sb < shiftBtns.length; sb++) { (function(b) { b.addEventListener("click", function() { var shifts = window._deliver30Shifts || []; var x = shifts[parseInt(b.getAttribute("data-shift"), 10)]; if (!x) return; var ics = makeICS(x.name + " (Deliver30)", x.sh, x.sm, x.eh, x.em, x.rrule); downloadICS(ics, x.name.replace(/\s+/g, "-").toLowerCase() + ".ics"); }); })(shiftBtns[sb]); }
+
+  var weekBtn = $("addWeekCal");
+  if (weekBtn) weekBtn.addEventListener("click", function() { var map = { Mon:"MO", Tue:"TU", Wed:"WE", Thu:"TH", Fri:"FR", Sat:"SA", Sun:"SU" }; var byday = App.sc.days.map(function(d) { return map[d]; }).filter(Boolean); if (!byday.length) return; var ics = makeICS("Delivery Shift (Deliver30)", 16, 30, 21, 0, byday); downloadICS(ics, "my-delivery-week.ics"); });
 }
 
 function liveUpdate() {
   var active = document.activeElement;
   var key = (active && active.getAttribute) ? active.getAttribute("data-key") : null;
   var caret = (active && active.selectionStart != null) ? active.selectionStart : null;
-
   var panelHtml = PANELS[App.tab]();
   var container = App.mobile ? document.querySelector(".main-mobile-inner") : document.querySelector(".main-inner");
   if (container) {
@@ -1017,10 +753,7 @@ function liveUpdate() {
     bindEvents();
     if (key) {
       var restored = document.querySelector('input[data-key="' + key + '"]');
-      if (restored) {
-        restored.focus();
-        if (caret != null) { try { restored.setSelectionRange(caret, caret); } catch (e) {} }
-      }
+      if (restored) { restored.focus(); if (caret != null) { try { restored.setSelectionRange(caret, caret); } catch (e) {} } }
     }
   }
 }
