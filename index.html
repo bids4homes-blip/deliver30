@@ -194,19 +194,38 @@ function todayKey() {
   function pad(n) { return (n < 10 ? "0" : "") + n; }
   return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate());
 }
-function logShift() {
+function logShift(mode) {
   var o = App.ov;
   var gross = num(o.gross), hours = num(o.hours), miles = num(o.miles), fuel = num(o.fuel), orders = num(o.orders);
   if (!gross && !hours) return false;
   var hist = loadHistory();
   var key = todayKey();
-  var entry = { date:key, gross:gross, hours:hours, miles:miles, fuel:fuel, orders:orders, ts:Date.now() };
-  var replaced = false;
-  for (var i = 0; i < hist.length; i++) { if (hist[i].date === key) { hist[i] = entry; replaced = true; break; } }
-  if (!replaced) hist.push(entry);
+  var existingIdx = -1;
+  for (var i = 0; i < hist.length; i++) { if (hist[i].date === key) { existingIdx = i; break; } }
+
+  if (existingIdx === -1) {
+    // No entry today — create one.
+    hist.push({ date:key, gross:gross, hours:hours, miles:miles, fuel:fuel, orders:orders, ts:Date.now() });
+    App.ov.justLogged = "added";
+  } else if (mode === "add") {
+    // Stack onto today (e.g. second app) — sum the figures.
+    var e = hist[existingIdx];
+    e.gross += gross; e.hours += hours; e.miles += miles; e.fuel += fuel; e.orders += orders;
+    App.ov.justLogged = "stacked";
+  } else {
+    // Replace today's entry.
+    hist[existingIdx] = { date:key, gross:gross, hours:hours, miles:miles, fuel:fuel, orders:orders, ts:Date.now() };
+    App.ov.justLogged = "updated";
+  }
   saveHistory(hist);
-  App.ov.justLogged = replaced ? "updated" : "added";
   return true;
+}
+
+function hasTodayEntry() {
+  var hist = loadHistory();
+  var key = todayKey();
+  for (var i = 0; i < hist.length; i++) { if (hist[i].date === key) return true; }
+  return false;
 }
 function deleteShift(ts) {
   var hist = loadHistory().filter(function(e) { return e.ts !== ts; });
@@ -279,7 +298,7 @@ function Overview() {
     return '<div data-tip="' + i + '" style="width:' + (i === o.tipIdx ? 18 : 6) + 'px;height:6px;border-radius:3px;background:' + (i === o.tipIdx ? C.amber : C.border) + ';cursor:pointer;transition:all 0.3s"></div>';
   }).join("");
 
-  var ovPreview = o.imgPreview ? '<div style="margin-bottom:16px;border-radius:12px;overflow:hidden;border:1px solid ' + C.border + '"><img src="' + o.imgPreview + '" alt="Earnings screenshot" style="width:100%;display:block;max-height:200px;object-fit:cover" /></div>' : "";
+  var ovPreview = "";
   var ovScanningNote = o.scanning ? '<div style="margin-top:12px;font-size:13px;color:' + C.muted + ';text-align:center">Reading your earnings total…</div>' : "";
   var ovError = o.scanError ? '<div style="margin-top:14px;font-size:13px;color:' + C.rustSoft + '">' + esc(o.scanError) + '</div>' : "";
   var ovOk = (!o.scanning && !o.scanError && o.scanOk) ?
@@ -301,8 +320,21 @@ function Overview() {
       ovScanningNote + ovError + ovOk +
     '</div>';
 
-  var loggedNote = o.justLogged ? '<div style="margin-top:10px;font-size:13px;color:' + C.tealSoft + ';text-align:center">\u2713 Shift ' + (o.justLogged === "updated" ? "updated" : "logged") + ' \u2014 view it on the Totals tab</div>' : "";
-  var logBtn = '<button id="logShiftBtn" style="width:100%;margin-bottom:16px;padding:14px 16px;border-radius:12px;border:1px solid ' + C.tealSoft + '55;background:' + C.tealSoft + '12;color:' + C.tealSoft + ';font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.05em;text-transform:uppercase">+ Log This Shift to Totals</button>' + loggedNote;
+  var loggedMsg = { added:"Shift logged", updated:"Today replaced", stacked:"Added to today's total" };
+  var loggedNote = o.justLogged ? '<div style="margin-top:10px;font-size:13px;color:' + C.tealSoft + ';text-align:center">\u2713 ' + (loggedMsg[o.justLogged] || "Logged") + ' \u2014 view it on the Totals tab</div>' : "";
+
+  var logBtn;
+  if (hasTodayEntry()) {
+    // Today already logged — offer to stack (another app) or replace.
+    logBtn =
+      '<div style="margin-bottom:8px;font-size:12px;color:' + C.muted + ';text-align:center;line-height:1.5">You already logged today. Stacking another app? Add it on. Fixing a mistake? Replace it.</div>' +
+      '<div style="display:flex;gap:10px;margin-bottom:16px">' +
+        '<button id="logAddBtn" style="flex:1;padding:14px 12px;border-radius:12px;border:1px solid ' + C.tealSoft + '55;background:' + C.tealSoft + '12;color:' + C.tealSoft + ';font-size:12px;font-weight:700;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase">+ Add to Today</button>' +
+        '<button id="logReplaceBtn" style="flex:1;padding:14px 12px;border-radius:12px;border:1px solid ' + C.border + ';background:transparent;color:' + C.creamDim + ';font-size:12px;font-weight:700;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase">Replace Today</button>' +
+      '</div>' + loggedNote;
+  } else {
+    logBtn = '<button id="logShiftBtn" style="width:100%;margin-bottom:16px;padding:14px 16px;border-radius:12px;border:1px solid ' + C.tealSoft + '55;background:' + C.tealSoft + '12;color:' + C.tealSoft + ';font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.05em;text-transform:uppercase">+ Log This Shift to Totals</button>' + loggedNote;
+  }
 
   return pageHead("Shift Tracker", "Today's Overview", "Upload your earnings screenshot or enter your totals to see your real net hourly rate.") +
     scanCard +
@@ -512,7 +544,7 @@ function OrderChecker() {
 
   var inputSection;
   if (o.mode === "photo") {
-    var preview = o.imgPreview ? '<div style="margin-bottom:16px;border-radius:12px;overflow:hidden;border:1px solid ' + C.border + '"><img src="' + o.imgPreview + '" alt="Order screenshot" style="width:100%;display:block;max-height:220px;object-fit:cover" /></div>' : "";
+    var preview = "";
     var scanningNote = o.scanning ? '<div style="margin-top:12px;font-size:13px;color:' + C.muted + ';text-align:center">Extracting payout, distance, and delivery time…</div>' : "";
     var errorBlock = o.scanError ? '<div style="margin-top:14px"><div style="font-size:13px;color:' + C.rustSoft + ';margin-bottom:10px">' + esc(o.scanError) + '</div><button data-mode="manual" style="width:100%;padding:10px 16px;border-radius:10px;border:1px solid ' + C.border + ';background:transparent;color:' + C.amber + ';font-size:12px;font-weight:700;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase">Switch to Manual Entry \u2192</button></div>' : "";
     var okNote = (!o.scanning && !o.scanError && o.result) ? '<div style="margin-top:12px;font-size:13px;color:' + C.tealSoft + '">\u2713 Read: $' + (o.pay || "0") + ' \u00B7 ' + (o.miles || "0") + ' mi \u00B7 ' + (o.minutes || "0") + ' min</div>' : "";
@@ -727,7 +759,11 @@ function bindEvents() {
   if (ovsi) ovsi.addEventListener("change", function(e) { var file = e.target.files && e.target.files[0]; if (file) handleOverviewScan(file); });
 
   var logBtn = $("logShiftBtn");
-  if (logBtn) logBtn.addEventListener("click", function() { if (logShift()) render(); });
+  if (logBtn) logBtn.addEventListener("click", function() { if (logShift("new")) render(); });
+  var logAddBtn = $("logAddBtn");
+  if (logAddBtn) logAddBtn.addEventListener("click", function() { if (logShift("add")) render(); });
+  var logReplaceBtn = $("logReplaceBtn");
+  if (logReplaceBtn) logReplaceBtn.addEventListener("click", function() { if (logShift("replace")) render(); });
 
   var delBtns = document.querySelectorAll("[data-del]");
   for (var db = 0; db < delBtns.length; db++) { (function(b) { b.addEventListener("click", function() { deleteShift(parseInt(b.getAttribute("data-del"), 10)); render(); }); })(delBtns[db]); }
