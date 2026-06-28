@@ -1,18 +1,33 @@
 // netlify/functions/scan-order.js
 //
-// Reads a delivery-order screenshot and returns { pay, miles, minutes }.
+// Reads a delivery screenshot and returns either:
+//   - order offer:   { pay, miles, minutes }
+//   - earnings summary: { gross, hours }
 // The Anthropic API key lives ONLY here as an environment variable —
 // it is never sent to the browser.
 //
-// Guardrails to keep cost near zero:
-//   - rejects anything that isn't a POST
-//   - rejects images larger than ~600KB (the browser already shrinks
-//     them to ~150KB, so this only catches abuse / bugs)
-//   - caps the model response at 150 tokens
-//   - uses the small, cheap Haiku model
-//   - 12-second hard timeout so a hung request can't run up a bill
+// Cost guards:
+//   - POST only
+//   - rejects images larger than ~600KB (browser already shrinks to ~150KB)
+//   - caps model response at 150 tokens, uses the small/cheap Haiku model
+//   - 12-second hard timeout
+//   - global daily scan cap (worst-case spend ceiling)
 
 const MAX_IMAGE_BYTES = 600 * 1024; // ~600KB ceiling on the base64 payload
+
+// Global daily scan cap — a hard ceiling on total scans per day across ALL
+// users, so worst-case API spend is bounded no matter who calls or how often.
+// This lives in function memory: it resets whenever the function cold-starts
+// (which on free tier happens fairly often), so it's a softer cap than a
+// database-backed counter — but it still stops a sustained flood within a
+// warm instance, with zero extra infrastructure. Tune to your comfort level.
+const MAX_SCANS_PER_DAY = 500;
+let scanCount = 0;
+let scanCountDay = "";
+
+function dayStamp() {
+  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD (UTC)
+}
 
 exports.handler = async (event) => {
   // CORS / preflight
@@ -35,6 +50,22 @@ exports.handler = async (event) => {
     };
   }
 
+  // Global daily cap. Reset the counter when the day rolls over.
+  const today = dayStamp();
+  if (today !== scanCountDay) {
+    scanCountDay = today;
+    scanCount = 0;
+  }
+  if (scanCount >= MAX_SCANS_PER_DAY) {
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        error: "The scanner has hit its daily limit. Please enter your numbers manually — it'll reset tomorrow.",
+      }),
+    };
+  }
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return {
@@ -45,11 +76,12 @@ exports.handler = async (event) => {
   }
 
   // Parse the incoming image
-  let image, mediaType;
+  let image, mediaType, kind;
   try {
     const parsed = JSON.parse(event.body || "{}");
     image = parsed.image;          // base64 string, no data: prefix
     mediaType = parsed.mediaType || "image/jpeg";
+    kind = parsed.kind === "summary" ? "summary" : "offer";
   } catch {
     return {
       statusCode: 400,
@@ -79,7 +111,26 @@ exports.handler = async (event) => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000); // 12s hard stop
 
+  // Two prompt modes: a single order offer, or an end-of-day earnings summary.
+  const promptText = kind === "summary"
+    ? "This is a screenshot from a food delivery app (DoorDash, Uber Eats, Grubhub) showing a driver's earnings. " +
+      "Extract TWO numbers as JSON: total earnings, and total time worked in hours.\n\n" +
+      "EARNINGS — read the most prominent earnings total on the screen. This is usually a large dollar amount near the top or center, often labeled 'Dash summary', 'Dash total', 'Total earnings', 'Today', or a date. TAKE THIS NUMBER. " +
+      "For example, if the screen says 'Dash summary $104.35', the earnings are 104.35.\n" +
+      "Only AVOID these specific cases: a single individual order's pay (labeled 'This offer' or 'This order'), or an 'Available balance' / cash-out amount. " +
+      "If you see both a session total (like 'Dash summary') and a separate 'this week' figure, use the session total — the larger prominent number being celebrated, not the weekly line item.\n\n" +
+      "HOURS — find total time worked, often labeled 'Total online time', 'Active time', or 'Dash time'. Convert 'X hr Y min' to decimal hours (e.g. '4 hr 18 min' = 4.3). " +
+      "Ignore offer/delivery counts like '9 out of 20'.\n\n" +
+      "Return ONLY raw JSON, no markdown: {\"gross\": number, \"hours\": number}. " +
+      "Use 0 only if a value is genuinely not present on the screen."
+    : "This is a screenshot of a food delivery order offer (DoorDash, Uber Eats, or Grubhub). " +
+      "Extract the payout in dollars, the delivery distance in miles, and the estimated " +
+      "delivery time in minutes. Return ONLY raw JSON, no markdown or explanation: " +
+      '{"pay": number, "miles": number, "minutes": number}. ' +
+      "Use 0 for any value you cannot find.";
+
   try {
+    scanCount++; // count this billable call against the daily cap
     const resp = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       signal: controller.signal,
@@ -99,15 +150,7 @@ exports.handler = async (event) => {
                 type: "image",
                 source: { type: "base64", media_type: mediaType, data: image },
               },
-              {
-                type: "text",
-                text:
-                  "This is a screenshot of a food delivery order (DoorDash, Uber Eats, or Grubhub). " +
-                  "Extract the payout in dollars, the delivery distance in miles, and the estimated " +
-                  "delivery time in minutes. Return ONLY raw JSON, no markdown or explanation: " +
-                  '{"pay": number, "miles": number, "minutes": number}. ' +
-                  "Use 0 for any value you cannot find.",
-              },
+              { type: "text", text: promptText },
             ],
           },
         ],
@@ -176,11 +219,18 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({
-        pay: Number(parsed.pay) || 0,
-        miles: Number(parsed.miles) || 0,
-        minutes: Number(parsed.minutes) || 0,
-      }),
+      body: JSON.stringify(
+        kind === "summary"
+          ? {
+              gross: Number(parsed.gross) || 0,
+              hours: Number(parsed.hours) || 0,
+            }
+          : {
+              pay: Number(parsed.pay) || 0,
+              miles: Number(parsed.miles) || 0,
+              minutes: Number(parsed.minutes) || 0,
+            }
+      ),
     };
   } catch (err) {
     clearTimeout(timeout);
@@ -195,6 +245,9 @@ exports.handler = async (event) => {
         retry: true,
         transient: aborted, // a timeout is worth one silent retry; a network failure isn't
       }),
+    };
+  }
+};
     };
   }
 };
